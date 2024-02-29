@@ -1,0 +1,75 @@
+h1, input, label, button, p, select, a, b {
+  font-family: Monospace, Sans-Serif;
+}
+.lang {
+  
+}
+.div {
+  margin-bottom: 10px;
+}
+.langdiv {
+  margin-top: 20px;
+}
+.lang {
+  margin-left: 5px;
+  margin-right: 5px;
+  text-decoration: none;
+  color: #000080;
+}
+.stat {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.canvas {
+  width: 400px;
+  height: 400px;
+  border: 2px solid #808080;
+  border-radius: 5px;
+  margin-right: -404px;
+  margin-left: 0px;
+}
+.input[type="number"] {
+  width: 120px;
+  font-size: 15px;
+  border: 1px solid #808080;
+  border-radius: 3px;
+  padding-top: 1.5px;
+  padding-bottom: 1.5px;
+}
+.input[type="checkbox"] {
+  margin-right: 10px;
+}
+.textarea {
+  margin-bottom: 10px;
+  resize: none;
+  width: 600px;
+  height: 200px;
+  font-size: 10px;
+}
+.button {
+  margin-left: 5px;
+  color: #ffffff;
+  border-radius: 5px;
+  border: none;
+  background: #4676d7;
+  min-width: 120px;
+  font-size: 16px;
+  padding: 3px;
+}
+.minibtn {
+  margin-left: 5px;
+  color: #ffffff;
+  border-radius: 3px;
+  border: none;
+  background: #4676d7;
+  min-width: 75px;
+  font-size: 14px;
+  padding: 3px;
+}
+.button:focus, .minibtn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px #4676d740;
+}
+.button:hover, .minibtn:hover {
+  background: #1d49aa;
+}
