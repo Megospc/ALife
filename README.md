@@ -6,7 +6,7 @@ Artifical evolution made with JavaScript.
 
 Idea is taken from project «The Battle Of Clans» by [Simulife Hub](https://youtube.com/@wallcraft-video).
 
-Version: 1.0.0 (27.02.2024)
+Version: 1.0.0 (29.02.2024)
 
 [**DEMOVERSION**](https://megospc.github.io/ALife/demo.html?lang=en)\
 [**FULL VERSION**](https://megospc.github.io/ALife/index.html?lang=en)
@@ -42,7 +42,7 @@ Cells can be different types:
 + **Antenna**. Each turn removes a little *charge* (if any) from the tile underneath it and gains energy. Does not die from *energy poisoning*.
 + **Shoot**. Consumes a lot of energy. Each shoot has its own *genome* (the program according to which it operates). By following its instructions, shoot can grow, creating up to three new cells around itself (it itself will turn into a wood), eat any *cell* nearby (except wood), etc. As long as it has not given off branches, it can move around the field and eat organic. Its color depends on the amount of energy, which it has (black - little, white - a lot). If the shoot accumulates a lot of energy, it will fall off the wood to which it is attached and become single-celled.
 + **Wood**. Involved in transporting energy from producing cells to shoots and seeds.
-+ **Seed**. A dormant appendage that consumes almost no energy. If the wood, to which it is attached, dies, the seed wakes up and turns into a shoot that will continue to carry out the commands of the *genome*. Sometimes, before turning into a shoot, a seed shoots out and flies through a certain number of *tiles*. If at the same time it encounters another *cell* on its way, this cell and the seed will die. It will also fall off and wake up if it accumulates a certain amount of energy.
++ **Seed**. A dormant shoot that consumes almost no energy. If the wood, to which it is attached, dies, the seed wakes up and turns into a shoot that will continue to carry out the commands of the *genome*. Sometimes, before turning into a shoot, a seed shoots out and flies through a certain number of *tiles*. If at the same time it encounters another *cell* on its way, this cell and the seed will die. It will also fall off and wake up if it accumulates a certain amount of energy.
 
 <img width="300" src="images/description1en.png">
 
