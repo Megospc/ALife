@@ -1,5 +1,3 @@
-// Версия: 1.0.0 (27.02.2024)
-
 /*************************
 * ТИПЫ КЛЕТОК:
 * 0 = ПУСТО
@@ -1008,7 +1006,7 @@ function createSimulation(width, height, consts, seed) {
       
       aerialCost: consts.aerialCost ?? 3000,
       aerialConsumption: consts.aerialConsumption ?? 10,
-      aerialInitial: consts.aerialInitial ?? 100,
+      aerialInitial: consts.aerialInitial ?? consts.producerAvg ?? 100,
       aerialSpeed: consts.aerialSpeed ?? 600,
       
       producerAvg: consts.producerAvg ?? 100,
@@ -1018,9 +1016,9 @@ function createSimulation(width, height, consts, seed) {
       sproutFallEnergy: consts.sproutFallEnergy ?? 50000,
       sproutOrganicEat: consts.sproutOrganicEat ?? 100,
       
-      seedCost: consts.sproutCost ?? 3000,
-      seedConsumption: consts.sproutConsumption ?? 5,
-      seedFallEnergy: consts.sproutFallEnergy ?? 20000,
+      seedCost: consts.seedCost ?? 3000,
+      seedConsumption: consts.seedConsumption ?? 5,
+      seedFallEnergy: consts.seedFallEnergy ?? 20000,
       
       seedShootDistance: consts.seedShootDistance ?? 20,
       seedShootBaseCost: consts.seedShootBaseCost ?? 3500,

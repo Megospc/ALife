@@ -38,13 +38,13 @@ class Element {
     return this;
   }
   
-  show(show = true) {
-    this.element.style.display = show ? "block":"none";
+  show(display = "block") {
+    this.element.style.display = display;
     
     return this;
   }
-  hide(hide = true) {
-    this.show(!hide);
+  hide() {
+    this.element.style.display = "none";
     
     return this;
   }

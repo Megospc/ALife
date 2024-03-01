@@ -1,5 +1,5 @@
 const style = {
-  background: "#303030",
+  background: "#323232",
   backMin: "#3b3b3b",
   backMax: "#080808",
   woodAvg: "#5a5a5a",

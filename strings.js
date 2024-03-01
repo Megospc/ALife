@@ -44,9 +44,12 @@ const languagesStrings = {
       "50, 10K (Стандартные)",
       "100, 20K (Много)",
       "150, 30K (Очень много)",
-      "200, 40K (Критически много)"
+      "200, 40K (Критически много)",
+      "240, 48K (Почти отравление)"
     ],
     setupStart: "запуск",
+    setupDownload: "скачать",
+    setupSelect: "выбрать",
     
     zoom: "Приближение",
     speed: "Скорость",
@@ -67,12 +70,14 @@ const languagesStrings = {
     groundmodeHeader: "Режим отрисовки земли",
     groundmodeValues: [
       "По умолчанию",
+      "Отравления",
       "Органика",
       "Заряд",
       "Ничего"
     ],
     infoCopy: "копировать",
     infoHide: "скрыть",
+    infoSave: "сохранить",
     renderoff: "Без отрисовки",
     rendertime: "Время отрисовки",
     handletime: "Время обработки",
@@ -103,11 +108,19 @@ const languagesStrings = {
     infoChargeHeader: "Заряд",
     infoSunHeader: "Солнце",
     
+    sandboxHeader: "Песочница",
+    sandboxName: "Название",
+    sandboxDescription: "Описание",
+    
+    toMainpage: "Главная страница",
+    toSandbox: "Песочница",
+    
     language: "Сменить язык",
     
     angleNames: ["СЕВЕР", "ВОСТОК", "ЮГ", "ЗАПАД"],
     
-    memoryAsk: (reqmem) => `Необходимо ${filesizeString(reqmem)} оперативной памяти. Запустить?`
+    memoryAsk: (reqmem) => `Необходимо ${filesizeString(reqmem)} оперативной памяти. Запустить?`,
+    readFileFailed: "Не удалось открыть файл"
   },
   "en": {
     setupHeader: "Settings",
@@ -149,14 +162,17 @@ const languagesStrings = {
     setupResourcesHeader: "Organic, charge",
     setupResourcesValues: [
       "5, 1K (Critically few)",
-      "10, 2K (Too few)",
+      "10, 2K (Very few)",
       "25, 5K (Few)",
       "50, 10K (Standard)",
-      "100, 20K (Many of)",
-      "150, 30K (Too many)",
-      "200, 40K (Critically many)"
+      "100, 20K (Many)",
+      "150, 30K (Very many)",
+      "200, 40K (Critically many)",
+      "240, 48K (Almost poisoning)"
     ],
     setupStart: "start",
+    setupDownload: "download",
+    setupSelect: "select",
     
     zoom: "Zoom",
     speed: "Speed",
@@ -177,12 +193,14 @@ const languagesStrings = {
     groundmodeHeader: "Background rendering mode",
     groundmodeValues: [
       "Default",
+      "Poisons",
       "Organic",
       "Charge",
       "Nothing"
     ],
     infoCopy: "copy",
     infoHide: "hide",
+    infoSave: "save",
     renderoff: "No rendering",
     rendertime: "Rendering time",
     handletime: "Processing time",
@@ -191,7 +209,7 @@ const languagesStrings = {
     
     infoTypes: [
       "WOOD",
-      "SPROUT",
+      "SHOOT",
       "SEED",
       "SEED",
       "LEAF",
@@ -213,10 +231,18 @@ const languagesStrings = {
     infoChargeHeader: "Charge",
     infoSunHeader: "Sun",
     
+    sandboxHeader: "Sandbox",
+    sandboxName: "Name",
+    sandboxDescription: "Description",
+    
+    toMainpage: "Home page",
+    toSandbox: "Sandbox",
+    
     language: "Change language",
     
     angleNames: ["NORTH", "EAST", "SOUTH", "WEST"],
     
-    memoryAsk: (reqmem) => `It needs ${filesizeString(reqmem)} of RAM. Do you want to start?`
+    memoryAsk: (reqmem) => `It needs ${filesizeString(reqmem)} of RAM. Do you want to start?`,
+    readFileFailed: "Failed to open the file"
   }
 };

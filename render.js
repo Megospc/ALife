@@ -172,6 +172,20 @@ function render(renderer) {
       
       ctx.fillRect(scaleX(x-0.5)+gridw/2, scaleY(y-0.5)+gridw/2, cellsize-gridw, cellsize-gridw);
     }
+    if (backtheme === "poisons") for (let x = sx; x < ex; x++) for (let y = sy; y <= ey; y++) {
+      const i = x+y*width;
+      
+      const organic = simulation.organic[i];
+      const charge = simulation.charge[i];
+      
+      if (organic >= maxOrganic) ctx.fillStyle = cellsize < 10 ? style.potionOrganic:style.potionOrganicZoom;
+      else {
+        if (charge >= maxCharge) ctx.fillStyle = cellsize < 10 ? style.potionCharge:style.potionChargeZoom;
+        else ctx.fillStyle = style.background;
+      }
+      
+      ctx.fillRect(scaleX(x-0.5)+gridw/2, scaleY(y-0.5)+gridw/2, cellsize-gridw, cellsize-gridw);
+    }
     if (backtheme === "organic") for (let x = sx; x < ex; x++) for (let y = sy; y <= ey; y++) {
       const i = x+y*width;
       
@@ -307,7 +321,7 @@ function render(renderer) {
     gl.uniform1f(renderer.camxloc, cameraX);
     gl.uniform1f(renderer.camyloc, cameraY);
     gl.uniform1i(renderer.themeloc, ["nothing", "default", "energy", "clan"].indexOf(theme));
-    gl.uniform1i(renderer.backthemeloc, ["nothing", "default", "organic", "charge"].indexOf(backtheme));
+    gl.uniform1i(renderer.backthemeloc, ["nothing", "default", "poisons", "organic", "charge"].indexOf(backtheme));
     
     gl.viewport(0, 0, canvasw, canvash);
     
@@ -484,20 +498,20 @@ void main() {
   }
   
   if (backtheme == 0) fragcolor = bgColor;
-  if (backtheme == 1) {
+  if (backtheme == 1 || backtheme == 2) {
     if (organic >= maxOrganic) fragcolor = potionOrganic;
     else {
       if (charge >= maxCharge) fragcolor = potionCharge;
       else fragcolor = bgColor;
     }
   }
-  if (backtheme == 2) {
+  if (backtheme == 3) {
     float v = float(organic)/float(maxOrganic);
     
     if (v >= 1.) fragcolor = vec4(1, 0, 0, 1);
     else fragcolor = vec4(1.-v, 1.-v, 1.-v, 1);
   }
-  if (backtheme == 3) {
+  if (backtheme == 4) {
     float v = float(charge)/float(maxCharge);
     
     if (v >= 1.) fragcolor = vec4(0, 0, 1, 1);

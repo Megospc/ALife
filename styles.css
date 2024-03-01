@@ -1,11 +1,28 @@
-h1, input, label, button, p, select, a, b {
+h1, h2 , h3, input, label, button, p, select, a, b {
   font-family: Monospace, Sans-Serif;
 }
-.lang {
-  
+.nameinput {
+  width: 600px;
+  font-size: 15px;
+  border: 1px solid #808080;
+  border-radius: 3px;
+  padding-top: 1.5px;
+  padding-bottom: 1.5px;
+}
+.pagelink {
+  color: #0000a0;
+  margin-top: 5px;
+  margin-bottom: 100px;
+  font-size: 16px;
+}
+.header {
+  margin-bottom: 0.3em;
 }
 .div {
   margin-bottom: 10px;
+}
+.headdiv {
+  margin-bottom: 20px;
 }
 .langdiv {
   margin-top: 20px;
@@ -19,6 +36,10 @@ h1, input, label, button, p, select, a, b {
 .stat {
   margin-top: 5px;
   margin-bottom: 5px;
+  font-size: 16px;
+}
+.label {
+  font-size: 16px;
 }
 .canvas {
   width: 400px;
@@ -44,7 +65,11 @@ h1, input, label, button, p, select, a, b {
   resize: none;
   width: 600px;
   height: 200px;
-  font-size: 10px;
+  font-size: 15px;
+  border: 1px solid #808080;
+  border-radius: 3px;
+  padding-top: 1.5px;
+  padding-bottom: 1.5px;
 }
 .button {
   margin-left: 5px;

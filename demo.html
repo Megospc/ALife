@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ALife</title>
+  <title>ALife - Demo</title>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -24,6 +24,7 @@
   
   const interface = setupInterface("main", simulation, {
     strings,
+    language,
     targetsize: 1200
   });
   
@@ -53,6 +54,13 @@
   for (let i = 0; i < simulation.charge.length; i++) simulation.charge[i] = charge;
   
   simulation.sun = 500;
+  
+  new Element({
+    elementType: "a",
+    href: "index.html?lang="+language,
+    className: "pagelink",
+    textContent: strings.toMainpage
+  }).to(main);
   
   setupLanguageChanger(new DivElement().to(main), strings, language);
   

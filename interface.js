@@ -10,7 +10,8 @@ function setupInterface(main, simulation, props = {}) {
     selectUniq: -1,
     selectIndex: -1,
     
-    strings: props.strings
+    strings: props.strings,
+    language: props.language
   };
   
   const strings = obj.strings;
@@ -74,9 +75,10 @@ function setupInterface(main, simulation, props = {}) {
   ], "default").attr("onchange", () => obj.changed = true).to(obj.themes);
   obj.backtheme = new SelectElement(strings.groundmodeHeader, [
     ["default", strings.groundmodeValues[0]],
-    ["organic", strings.groundmodeValues[1]],
-    ["charge", strings.groundmodeValues[2]],
-    ["nothing", strings.groundmodeValues[3]]
+    ["poisons", strings.groundmodeValues[1]],
+    ["organic", strings.groundmodeValues[2]],
+    ["charge", strings.groundmodeValues[3]],
+    ["nothing", strings.groundmodeValues[4]]
   ], "default").attr("onchange", () => obj.changed = true).to(obj.themes);
   
   obj.canvasdiv = new DivElement().to(obj.main);
@@ -109,6 +111,11 @@ function setupInterface(main, simulation, props = {}) {
   obj.infohide = new ButtonElement(strings.infoHide, function() {
     obj.selectType = "none";
     obj.changed = true;
+  }).to(obj.infobtns);
+  obj.infosave = new ButtonElement(strings.infoSave, function() {
+    sessionStorage.setItem("alife-save", interface.selectJSON);
+    
+    window.open("sandbox.html?lang="+obj.language);
   }).to(obj.infobtns);
   
   obj.addonenergydiv = new DivElement().to(obj.undercanvas);
@@ -295,7 +302,7 @@ function setupInterface(main, simulation, props = {}) {
         const v = +e.code[5];
         
         if (seltheme && v < 3) obj.theme.value = ["nothing", "default", "energy", "clan"][v];
-        if (selbacktheme && v < 4) obj.backtheme.value = ["nothing", "default", "organic", "charge"][v];
+        if (selbacktheme && v < 4) obj.backtheme.value = ["nothing", "default", "posions", "organic", "charge"][v];
         
         obj.changed = true;
       }
@@ -351,8 +358,9 @@ function setupSettings(main, props) {
   obj.main = new Element(main);
   
   obj.header = new Element({
-    elementType: "h1",
-    textContent: strings.setupHeader
+    elementType: props.header ?? "h1",
+    textContent: strings.setupHeader,
+    className: "header"
   }).to(obj.main);
   
   obj.seed = new NumberInput(strings.setupSeedHeader, 1, 2147483646, 1, true).append(
@@ -379,9 +387,9 @@ function setupSettings(main, props) {
     [750, strings.setupSunValues[4]],
     [1000, strings.setupSunValues[5]],
     [2000, strings.setupSunValues[6]]
-  ], 500).to(setup);
+  ], 500).to(obj.main);
   
-  obj.density = new SelectElement(strings.setupDensityHeader, [
+  if (props.density ?? true) obj.density = new SelectElement(strings.setupDensityHeader, [
     [3, strings.setupDensityValues[0]],
     [4, strings.setupDensityValues[1]],
     [6, strings.setupDensityValues[2]],
@@ -390,7 +398,7 @@ function setupSettings(main, props) {
     [25, strings.setupDensityValues[5]],
     [36, strings.setupDensityValues[6]],
     [50, strings.setupDensityValues[7]],
-  ], 9).to(setup);
+  ], 9).to(obj.main);
   
   obj.resources = new SelectElement(strings.setupResourcesHeader, [
     [1000, strings.setupResourcesValues[0]],
@@ -399,10 +407,12 @@ function setupSettings(main, props) {
     [10000, strings.setupResourcesValues[3]],
     [20000, strings.setupResourcesValues[4]],
     [30000, strings.setupResourcesValues[5]],
-    [40000, strings.setupResourcesValues[6]]
-  ], 10000).to(setup);
+    [40000, strings.setupResourcesValues[6]],
+    [48000, strings.setupResourcesValues[7]]
+  ], 10000).to(obj.main);
   
-  obj.start = new ButtonElement(strings.setupStart, () => props.onstart()).to(setup);
+  obj.buttons = new DivElement().to(obj.main);
+  obj.start = new ButtonElement(strings.setupStart, () => props.onstart()).to(obj.buttons);
   
   obj.randomSeed = function() {
     obj.seed.value = generateRandomSeed();
@@ -442,7 +452,7 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
   let lastHandleFrame = 0;
   let frame = 0;
   
-  setInterval(() => {
+  return setInterval(() => {
     const renderstart = performance.now();
     
     if (interface.renderoff.value) interface.canvasdiv.hide();
@@ -492,7 +502,7 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
       
       lastTime = time;
     }
-  }, 20);
+  }, 15);
 }
 
 function updateSelectInfo(interface, simulation) {
@@ -557,6 +567,22 @@ function updateSelectInfo(interface, simulation) {
   }
   
   const type = simulation.type[i];
+  
+  if (type === 2 || type === 3 || type === 4) {
+    interface.selectJSON = JSON.stringify({
+      name: "",
+      descriotion: "",
+      
+      genome: [...simulation.genome.slice(i*genomeLength, (i+1)*genomeLength)],
+      consts: simulation.consts,
+      
+      settings: {
+        sun: simulation.sun
+      }
+    });
+    
+    interface.infosave.show("inline");
+  } else interface.infosave.hide();
   
   if (type > 0) {
     println(strings.infoTypes[type-1]);

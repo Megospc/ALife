@@ -9,6 +9,13 @@ const settings = setupSettings("setup", {
   onstart: start
 });
 
+new Element({
+  elementType: "a",
+  href: "sandbox.html?lang="+language,
+  className: "pagelink",
+  textContent: strings.toSandbox
+}).to(setup);
+
 setupLanguageChanger(new DivElement().to(setup), strings, language);
 
 var simulation, interface, renderer;
@@ -64,6 +71,7 @@ function start() {
   
   interface = setupInterface("main", simulation, {
     strings,
+    language,
     targetsize
   });
   
