@@ -26,7 +26,7 @@ Version: 1.1.0 (01.03.2024)
 ## Features
 + It works right in a browser: **you don't need to download anything**, just go by [the link](https://megospc.github.io/ALife/index.html?lang=en).
 + You can run worlds up to **1800x1800 tiles** in size.
-+ It uses WebGL and it renders on your GPU, so **rendering is faster by 3 times**.
++ It uses WebGL and it renders on your GPU, so **rendering is faster by 10 times**!
 + The required memory buffer allocates when the simulation starts, so JavaScript's garbage cleaner isn't busy. **This speeds up processing by 2 time**.
 + It works on mobile devices.
 
@@ -47,7 +47,7 @@ Cells can be different types:
 <img width="300" src="images/description1en.png">
 
 ### Home Page
-By opening the [home page](https://megospc.github.io/ALife/index.html?lang=ru), you will see the simulation settings:
+By opening the [home page](https://megospc.github.io/ALife/index.html?lang=eng), you will see the simulation settings:
 + **Seed**. The number from which the simulation will be created. Simulations with the same settings and seeds will give the same result.
 + **Field size**. The size of the simulation in *tiles*.
 + **Sun level**. The higher the sun level, the more energy leaves can get.

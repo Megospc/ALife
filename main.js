@@ -993,10 +993,7 @@ function getSimulationConsts(consts) {
 }
 
 function createSimulation(width, height, consts, seed) {
-  const blockh = Math.min(Math.floor(1800/width), height);
-  const blockl = Math.ceil(blockh*width/16)*16;
-  
-  const cells = Math.ceil(height/blockh-1)*blockh*width+blockl;
+  const cells = width*height;
   
   const simulation = {
     width, height,

@@ -17,7 +17,10 @@ function render(renderer) {
   
   const zoom = interface.getZoom();
   
-  const cellsize = canvas.attr("width")/width*zoom;
+  const canvasw = canvas.attr("width");
+  const canvash = canvas.attr("height");
+  
+  const cellsize = canvasw/width*zoom;
   
   gl.clear(gl.COLOR_BUFFER_BIT);
   
@@ -35,16 +38,13 @@ function render(renderer) {
     for (let i = 0; i < keys.length; i++) clans[keys[i]] = i/keys.length;
   }
   
-  if (cellsize > 10) {
+  if (cellsize > 10 || !gl) {
     const maxOrganic = consts.maxOrganic;
     const maxCharge = consts.maxCharge;
     
     const energyUnit = consts.energyUnit;
     
     const sproutFallEnergy = consts.sproutFallEnergy;
-    
-    const canvasw = canvas.attr("width");
-    const canvash = canvas.attr("height");
     
     const cameraX = interface.cameraX;
     const cameraY = interface.cameraY;
@@ -306,57 +306,69 @@ function render(renderer) {
     ctx.fillRect(0, 0, canvasw, scaleY(-0.5));
     ctx.fillRect(0, canvash, canvasw, -canvash+scaleY(height-0.5));
   } else {
-    const canvasw = webgl.attr("width");
-    const canvash = webgl.attr("height");
-    
-    const blockh = renderer.blockh;
-    const blockl = Math.ceil(blockh*width/16)*16;
-    
-    const cameraX = Math.trunc(interface.cameraX/width*zoom*canvasw)*width/zoom/canvasw;
-    const cameraY = Math.trunc(interface.cameraY/height*zoom*canvash)*height/zoom/canvash;
-    
-    ctx.clearRect(0, 0, canvas.attr("width"), canvas.attr("height"));
+    const cameraX = Math.trunc(interface.cameraX/width*canvasw*cellsize)/cellsize/canvasw;
+    const cameraY = Math.trunc(interface.cameraY/height*canvash*cellsize)/cellsize/canvasw;
     
     gl.uniform1f(renderer.zoomloc, zoom);
     gl.uniform1f(renderer.camxloc, cameraX);
     gl.uniform1f(renderer.camyloc, cameraY);
+    
     gl.uniform1i(renderer.themeloc, ["nothing", "default", "energy", "clan"].indexOf(theme));
     gl.uniform1i(renderer.backthemeloc, ["nothing", "default", "poisons", "organic", "charge"].indexOf(backtheme));
     
+    {
+      gl.bindTexture(gl.TEXTURE_2D, renderer.textureType);
+      
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, simulation.type, 0);
+      
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    }
+    
+    {
+      gl.bindTexture(gl.TEXTURE_2D, renderer.textureOrganic);
+      
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(simulation.organic.buffer), 0);
+      
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    }
+    
+    {
+      gl.bindTexture(gl.TEXTURE_2D, renderer.textureCharge);
+      
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(simulation.charge.buffer), 0);
+      
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    }
+    
+    ctx.clearRect(0, 0, canvasw, canvash);
+    
     gl.viewport(0, 0, canvasw, canvash);
     
-    for (let i = 0; i < height; i += blockh) {
-      const buf = gl.createBuffer();
-      
-      const sy = ((height-i+cameraY)/width-0.5)*zoom*2;
-      const ey = ((height-(i+blockh)+cameraY)/width-0.5)*zoom*2;
-      
-      if (ey > 1) continue;
-      if (sy < -1) continue;
-      
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-        -1, sy,
-        -1, ey,
-        1, ey,
-        1, ey,
-        1, sy,
-        -1, sy
-      ]), gl.STATIC_DRAW);
-      
-      gl.enableVertexAttribArray(renderer.posloc);
-      gl.vertexAttribPointer(renderer.posloc, 2, gl.FLOAT, false, 0, 0);
-      
-      const si = i*width;
-      
-      if (theme !== "nothing") gl.uniform4iv(renderer.dataloc, new Int32Array(simulation.type.buffer.slice(si, si+blockl)));
-      if (backtheme !== "nothing" && backtheme !== "charge") gl.uniform4iv(renderer.organicloc, new Int32Array(simulation.organic.buffer.slice(si*4, (si+blockl)*4)))
-      if (backtheme !== "nothing" && backtheme !== "organic") gl.uniform4iv(renderer.chargeloc, new Int32Array(simulation.charge.buffer.slice(si*4, (si+blockl)*4)));
-      
-      gl.uniform1i(renderer.offsetyloc, i);
-      
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-    }
+    const buf = gl.createBuffer();
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      -1, -1,
+      -1, 1,
+      1, 1,
+      -1, -1,
+      1, 1,
+      1, -1,
+    ]), gl.STATIC_DRAW);
+    
+    gl.enableVertexAttribArray(renderer.posloc);
+    gl.vertexAttribPointer(renderer.posloc, 2, gl.FLOAT, false, 0, 0);
+    
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
     
     if (theme === "clan") {
       const sx = Math.max(Math.floor(-canvasw/2/cellsize+cameraX+width/2), 0);
@@ -405,17 +417,26 @@ function createRenderer(interface, simulation, style) {
   
   const gl = interface.gl;
   
-  const blockh = Math.min(Math.floor(1800/width), height);
+  const textureType = gl.createTexture();
+  const textureOrganic = gl.createTexture();
+  const textureCharge = gl.createTexture();
   
   const vertextext = `#version 300 es
 
 precision highp float;
 
+uniform float zoom;
+uniform float camx;
+uniform float camy;
+
 in vec4 vertexpos;
 out vec2 fragpos;
 
 void main() {
-  fragpos = vertexpos.xy;
+  fragpos = vec2(
+    (vertexpos.x+1.)/2.+camx,
+    (-vertexpos.y+1.)/2.+camy
+  );
   
   gl_Position = vertexpos;
 }`;
@@ -429,14 +450,9 @@ in vec2 fragpos;
 
 out vec4 fragcolor;
 
-uniform ivec4 data[${Math.ceil(width*blockh/16)}];
-uniform ivec4 organics[${Math.ceil(width*blockh/4)}];
-uniform ivec4 charges[${Math.ceil(width*blockh/4)}];
-
-uniform float zoom;
-uniform float camx;
-uniform float camy;
-uniform int offsety;
+uniform sampler2D texture_types;
+uniform sampler2D texture_organic;
+uniform sampler2D texture_charge;
 
 uniform int theme;
 uniform int backtheme;
@@ -444,7 +460,6 @@ uniform int backtheme;
 void main() {
   const int width = ${width};
   const int height = ${height};
-  const int blockh = ${blockh};
   
   const int maxOrganic = ${consts.maxOrganic};
   const int maxCharge = ${consts.maxCharge};
@@ -462,40 +477,24 @@ void main() {
   const vec4 potionOrganic = ${hexToVec4(style.potionOrganic)};
   const vec4 potionCharge = ${hexToVec4(style.potionCharge)};
   
-  int val = 0;
+  int x = int(fragpos.x*float(width));
+  int y = int(fragpos.y*float(height));
   
-  int organic;
-  int charge;
-  
-  float fx = (fragpos.x/2./zoom+0.5)*float(width)+camx;
-  float fy = (-fragpos.y/2./zoom+0.5)*float(height)+camy;
-  
-  if (fx < 0. || fy >= float(height) || fx >= float(width)) {
+  if (x < 0 || x >= width || y < 0 || y >= height) {
     fragcolor = edgeColor;
     
     return;
   }
   
-  int x = int(fx);
-  int y = int(fy)-offsety;
+  vec2 p = vec2((float(x)+0.5)/float(width), (float(y)+0.5)/float(height));
   
-  int l = x+y*width;
+  int type = int(texture(texture_types, p).x*255.);
   
-  {
-    int i = l >> 4;
-    int j = (l >> 2) & 3;
-    int k = l & 3;
-    
-    val = (data[i][j] >> (8*k)) & 255;
-  }
+  vec4 organicv = texture(texture_organic, p)*255.;
+  vec4 chargev = texture(texture_charge, p)*255.;
   
-  {
-    int i = l >> 2;
-    int j = l & 3;
-    
-    organic = organics[i][j];
-    charge = charges[i][j];
-  }
+  int organic = (int(organicv[3]) << 24) + (int(organicv[2]) << 16) + (int(organicv[1]) << 8) + int(organicv[0]);
+  int charge = (int(chargev[3]) << 24) + (int(chargev[2]) << 16) + (int(chargev[1]) << 8) + int(chargev[0]);
   
   if (backtheme == 0) fragcolor = bgColor;
   if (backtheme == 1 || backtheme == 2) {
@@ -519,13 +518,13 @@ void main() {
   }
   
   if (theme == 1 || theme == 2) {
-    if (val == 1) fragcolor = woodColor;
-    if (val == 2) fragcolor = sproutColor;
-    if (val == 3) fragcolor = seedColor;
-    if (val == 4) fragcolor = seedShootColor;
-    if (val == 5) fragcolor = leafColor;
-    if (val == 6) fragcolor = rootColor;
-    if (val == 7) fragcolor = aerialColor;
+    if (type == 1) fragcolor = woodColor;
+    if (type == 2) fragcolor = sproutColor;
+    if (type == 3) fragcolor = seedColor;
+    if (type == 4) fragcolor = seedShootColor;
+    if (type == 5) fragcolor = leafColor;
+    if (type == 6) fragcolor = rootColor;
+    if (type == 7) fragcolor = aerialColor;
   }
 }`;
   
@@ -538,21 +537,39 @@ void main() {
   
   gl.clearColor(0.5, 0.5, 0.5, 1);
   
-  return {
-    program, gl, style, blockh,
+  const obj = {
+    program, gl, style,
+    
     simulation, interface, style,
     canvas: interface.canvas,
     webgl: interface.webgl,
     ctx: interface.ctx,
+    
     posloc: gl.getAttribLocation(program, 'vertexpos'),
-    dataloc: gl.getUniformLocation(program, 'data'),
-    organicloc: gl.getUniformLocation(program, 'organics'),
-    chargeloc: gl.getUniformLocation(program, 'charges'),
+    textypeloc: gl.getUniformLocation(program, 'texture_types'),
+    texorganicloc: gl.getUniformLocation(program, 'texture_organic'),
+    texchargeloc: gl.getUniformLocation(program, 'texture_charge'),
     zoomloc: gl.getUniformLocation(program, 'zoom'),
     camxloc: gl.getUniformLocation(program, 'camx'),
     camyloc: gl.getUniformLocation(program, 'camy'),
-    offsetyloc: gl.getUniformLocation(program, 'offsety'),
     themeloc: gl.getUniformLocation(program, 'theme'),
-    backthemeloc: gl.getUniformLocation(program, 'backtheme')
+    backthemeloc: gl.getUniformLocation(program, 'backtheme'),
+    
+    textureType,
+    textureOrganic,
+    textureCharge
   };
+  
+  gl.uniform1i(obj.texttypeloc, 0);
+  gl.uniform1i(obj.texorganicloc, 1);
+  gl.uniform1i(obj.texchargeloc, 2);
+  
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, obj.textureType);
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, obj.textureOrganic);
+  gl.activeTexture(gl.TEXTURE2);
+  gl.bindTexture(gl.TEXTURE_2D, obj.textureCharge);
+  
+  return obj;
 }
