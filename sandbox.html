@@ -81,17 +81,7 @@
   
   setupLanguageChanger(new DivElement().to(select), strings, language);
   
-  var obj, simulation, interface, interval;
-  
-  const settings = setupSettings("setup", {
-    strings,
-    
-    header: "h2",
-    
-    density: false,
-    
-    onstart: start
-  });
+  var obj, settings, simulation, interface, interval;
   
   function getJSON() {
     obj.settings = {
@@ -111,6 +101,17 @@
       return;
     }
     
+    settings = setupSettings("setup", {
+      strings,
+      
+      header: "h2",
+      
+      density: false,
+      prog: getSimulationConsts(obj.consts).genomeHeight,
+      
+      onstart: start
+    });
+    
     settings.randomSeed();
     
     nameelem.attr("value", obj.name);
@@ -118,6 +119,7 @@
     
     settings.sun.value = obj.settings.sun ?? 500;
     settings.resources.value = obj.settings.resources ?? 10000;
+    settings.prog.value = obj.settings.prog ?? 0;
     
     select.hide();
     edit.show();
@@ -156,7 +158,7 @@
     simulation.angle[i] = 0;
     
     simulation.current[i] = 0;
-    simulation.curprog[i] = 0;
+    simulation.curprog[i] = +settings.prog.value;
     simulation.clan[i] = 0;
     
     const genomeLength = simulation.consts.genomeWidth*simulation.consts.genomeHeight;

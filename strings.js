@@ -47,6 +47,7 @@ const languagesStrings = {
       "200, 40K (Критически много)",
       "240, 48K (Почти отравление)"
     ],
+    setupProgHeader: "Номер программы",
     setupStart: "запуск",
     setupDownload: "скачать",
     setupSelect: "выбрать",
@@ -170,6 +171,7 @@ const languagesStrings = {
       "200, 40K (Critically many)",
       "240, 48K (Almost poisoning)"
     ],
+    setupProgHeader: "Program number",
     setupStart: "start",
     setupDownload: "download",
     setupSelect: "select",

@@ -411,6 +411,10 @@ function setupSettings(main, props) {
     [48000, strings.setupResourcesValues[7]]
   ], 10000).to(obj.main);
   
+  if (props.prog) obj.prog = new SelectElement(strings.setupProgHeader,
+    new Array(props.prog).fill(0).map((x, i) => [i, i.toString(16).toUpperCase()])
+  , 0).to(obj.main);
+  
   obj.buttons = new DivElement().to(obj.main);
   obj.start = new ButtonElement(strings.setupStart, () => props.onstart()).to(obj.buttons);
   
@@ -426,7 +430,8 @@ function setupLanguageChanger(main, strings, language) {
   
   new Element({
     elementType: "label",
-    textContent: strings.language+": "
+    textContent: strings.language+": ",
+    className: "label"
   }).to(main);
   
   if (language !== "en") new Element({
@@ -542,7 +547,7 @@ function updateSelectInfo(interface, simulation) {
     println(strings.infoGenomeHeader+":");
     
     for (let y = 0; y < genomeHeight; y++) {
-      value += y+": ";
+      value += y.toString(16).toUpperCase()+": ";
       
       for (let x = 0; x < genomeWidth; x++) {
         let nstr = simulation.genome[i*genomeLength+y*genomeWidth+x].toString(16).toUpperCase();
@@ -577,7 +582,8 @@ function updateSelectInfo(interface, simulation) {
       consts: simulation.consts,
       
       settings: {
-        sun: simulation.sun
+        sun: simulation.sun,
+        prog: simulation.curprog[i]
       }
     });
     

@@ -940,6 +940,58 @@ function iteration(simulation) {
   simulation.frame++;
 }
 
+function getSimulationConsts(consts) {
+  return {
+    mutationChance: consts.mutationChance ?? 0.2,
+    
+    genomeWidth: consts.genomeWidth ?? 50,
+    genomeHeight: consts.genomeHeight ?? 5,
+    
+    maxOrganic: consts.maxOrganic ?? 250,
+    addOrganic: consts.addOrganic ?? 1,
+    organicCost: consts.organicCost ?? 200,
+    
+    maxCharge: consts.maxCharge ?? 50000,
+    chargeAvg: consts.chargeAvg ?? 10000,
+    chargeStep: consts.chargeStep ?? 5,
+    chargeNoUp: consts.chargeNoUp ?? true,
+    
+    woodConsumption: consts.woodConsumption ?? 10,
+    
+    leafCost: consts.leafCost ?? 3500,
+    leafConsumption: consts.leafConsumption ?? 10,
+    leafInitial: consts.leafInitial ?? consts.producerAvg ?? 100,
+    leafMaxNears: consts.leafMaxNears ?? 1,
+    
+    rootCost: consts.rootCost ?? 3000,
+    rootConsumption: consts.rootConsumption ?? 10,
+    rootInitial: consts.rootInitial ?? consts.producerAvg ?? 100,
+    rootSpeed: consts.rootSpeed ?? 3,
+    
+    aerialCost: consts.aerialCost ?? 3000,
+    aerialConsumption: consts.aerialConsumption ?? 10,
+    aerialInitial: consts.aerialInitial ?? consts.producerAvg ?? 100,
+    aerialSpeed: consts.aerialSpeed ?? 600,
+    
+    producerAvg: consts.producerAvg ?? 100,
+    
+    sproutCost: consts.sproutCost ?? 2000,
+    sproutConsumption: consts.sproutConsumption ?? 50,
+    sproutFallEnergy: consts.sproutFallEnergy ?? 50000,
+    sproutOrganicEat: consts.sproutOrganicEat ?? 100,
+    
+    seedCost: consts.seedCost ?? 3000,
+    seedConsumption: consts.seedConsumption ?? 5,
+    seedFallEnergy: consts.seedFallEnergy ?? 20000,
+    
+    seedShootDistance: consts.seedShootDistance ?? 20,
+    seedShootBaseCost: consts.seedShootBaseCost ?? 3500,
+    seedShootDistanceCost: consts.seedShootDistanceCost ?? 100,
+    
+    energyUnit: consts.energyUnit ?? 100
+  };
+}
+
 function createSimulation(width, height, consts, seed) {
   const blockh = Math.min(Math.floor(1800/width), height);
   const blockl = Math.ceil(blockh*width/16)*16;
@@ -977,55 +1029,7 @@ function createSimulation(width, height, consts, seed) {
     
     placeid: new Uint32Array(cells),
     
-    consts: {
-      mutationChance: consts.mutationChance ?? 0.2,
-      
-      genomeWidth: consts.genomeWidth ?? 50,
-      genomeHeight: consts.genomeHeight ?? 5,
-      
-      maxOrganic: consts.maxOrganic ?? 250,
-      addOrganic: consts.addOrganic ?? 1,
-      organicCost: consts.organicCost ?? 200,
-      
-      maxCharge: consts.maxCharge ?? 50000,
-      chargeAvg: consts.chargeAvg ?? 10000,
-      chargeStep: consts.chargeStep ?? 5,
-      chargeNoUp: consts.chargeNoUp ?? true,
-      
-      woodConsumption: consts.woodConsumption ?? 10,
-      
-      leafCost: consts.leafCost ?? 3500,
-      leafConsumption: consts.leafConsumption ?? 10,
-      leafInitial: consts.leafInitial ?? consts.producerAvg ?? 100,
-      leafMaxNears: consts.leafMaxNears ?? 1,
-      
-      rootCost: consts.rootCost ?? 3000,
-      rootConsumption: consts.rootConsumption ?? 10,
-      rootInitial: consts.rootInitial ?? consts.producerAvg ?? 100,
-      rootSpeed: consts.rootSpeed ?? 3,
-      
-      aerialCost: consts.aerialCost ?? 3000,
-      aerialConsumption: consts.aerialConsumption ?? 10,
-      aerialInitial: consts.aerialInitial ?? consts.producerAvg ?? 100,
-      aerialSpeed: consts.aerialSpeed ?? 600,
-      
-      producerAvg: consts.producerAvg ?? 100,
-      
-      sproutCost: consts.sproutCost ?? 2000,
-      sproutConsumption: consts.sproutConsumption ?? 50,
-      sproutFallEnergy: consts.sproutFallEnergy ?? 50000,
-      sproutOrganicEat: consts.sproutOrganicEat ?? 100,
-      
-      seedCost: consts.seedCost ?? 3000,
-      seedConsumption: consts.seedConsumption ?? 5,
-      seedFallEnergy: consts.seedFallEnergy ?? 20000,
-      
-      seedShootDistance: consts.seedShootDistance ?? 20,
-      seedShootBaseCost: consts.seedShootBaseCost ?? 3500,
-      seedShootDistanceCost: consts.seedShootDistanceCost ?? 100,
-      
-      energyUnit: consts.energyUnit ?? 100
-    },
+    consts: getSimulationConsts(consts),
     
     random: seed,
     seed,
