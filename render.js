@@ -51,6 +51,7 @@ function render(renderer) {
     
     function getWoodColor(giv) {
       if (theme === "default") return style.woodAvg;
+      if (theme === "contrast") return style.woodAvg;
       
       giv /= energyUnit;
       
@@ -207,7 +208,7 @@ function render(renderer) {
       ctx.fillRect(scaleX(x-0.5)+gridw/2, scaleY(y-0.5)+gridw/2, cellsize-gridw, cellsize-gridw);
     }
     
-    if (theme === "default" || theme === "energy") {
+    if (theme === "default" || theme === "energy" || theme === "contrast") {
       ctx.lineWidth = cellsize*0.15;
       
       ctx.lineCap = "square";
@@ -306,14 +307,14 @@ function render(renderer) {
     ctx.fillRect(0, 0, canvasw, scaleY(-0.5));
     ctx.fillRect(0, canvash, canvasw, -canvash+scaleY(height-0.5));
   } else {
-    const cameraX = Math.trunc(interface.cameraX/width*canvasw*cellsize)/cellsize/canvasw;
-    const cameraY = Math.trunc(interface.cameraY/height*canvash*cellsize)/cellsize/canvasw;
+    const cameraX = Math.trunc(interface.cameraX*canvasw*cellsize)/cellsize/canvasw;
+    const cameraY = Math.trunc(interface.cameraY*canvash*cellsize)/cellsize/canvash;
     
     gl.uniform1f(renderer.zoomloc, zoom);
-    gl.uniform1f(renderer.camxloc, cameraX);
-    gl.uniform1f(renderer.camyloc, cameraY);
+    gl.uniform1f(renderer.camxloc, cameraX/width);
+    gl.uniform1f(renderer.camyloc, cameraY/height);
     
-    gl.uniform1i(renderer.themeloc, ["nothing", "default", "energy", "clan"].indexOf(theme));
+    gl.uniform1i(renderer.themeloc, ["nothing", "default", "energy", "contrast", "clan"].indexOf(theme));
     gl.uniform1i(renderer.backthemeloc, ["nothing", "default", "poisons", "organic", "charge"].indexOf(backtheme));
     
     {
@@ -434,8 +435,8 @@ out vec2 fragpos;
 
 void main() {
   fragpos = vec2(
-    (vertexpos.x+1.)/2.+camx,
-    (-vertexpos.y+1.)/2.+camy
+    (vertexpos.x/zoom+1.)/2.+camx,
+    (-vertexpos.y/zoom+1.)/2.+camy
   );
   
   gl_Position = vertexpos;
@@ -469,6 +470,10 @@ void main() {
   const vec4 sproutColor = ${hexToVec4(style.sproutColor)};
   const vec4 seedColor = ${hexToVec4(style.seedColor)};
   const vec4 seedShootColor = ${hexToVec4(style.seedShootColor)};
+  const vec4 woodContrast = ${hexToVec4(style.woodContrast)};
+  const vec4 sproutContrast = ${hexToVec4(style.sproutContrast)};
+  const vec4 seedContrast = ${hexToVec4(style.seedContrast)};
+  const vec4 seedShootContrast = ${hexToVec4(style.seedShootContrast)};
   const vec4 leafColor = ${hexToVec4(style.leafColor)};
   const vec4 rootColor = ${hexToVec4(style.rootColor)};
   const vec4 aerialColor = ${hexToVec4(style.aerialColor)};
@@ -477,10 +482,13 @@ void main() {
   const vec4 potionOrganic = ${hexToVec4(style.potionOrganic)};
   const vec4 potionCharge = ${hexToVec4(style.potionCharge)};
   
-  int x = int(fragpos.x*float(width));
-  int y = int(fragpos.y*float(height));
+  float fx = fragpos.x;
+  float fy = fragpos.y;
   
-  if (x < 0 || x >= width || y < 0 || y >= height) {
+  int x = int(fx*float(width));
+  int y = int(fy*float(height));
+  
+  if (fx < 0. || fx > 1. || fy < 0. || fy > 1.) {
     fragcolor = edgeColor;
     
     return;
@@ -522,6 +530,15 @@ void main() {
     if (type == 2) fragcolor = sproutColor;
     if (type == 3) fragcolor = seedColor;
     if (type == 4) fragcolor = seedShootColor;
+    if (type == 5) fragcolor = leafColor;
+    if (type == 6) fragcolor = rootColor;
+    if (type == 7) fragcolor = aerialColor;
+  }
+  if (theme == 3) {
+    if (type == 1) fragcolor = woodContrast;
+    if (type == 2) fragcolor = sproutContrast;
+    if (type == 3) fragcolor = seedContrast;
+    if (type == 4) fragcolor = seedShootContrast;
     if (type == 5) fragcolor = leafColor;
     if (type == 6) fragcolor = rootColor;
     if (type == 7) fragcolor = aerialColor;

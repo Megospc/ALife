@@ -22,10 +22,11 @@ var simulation, interface, renderer;
 
 settings.randomSeed();
 
-const frameCallbacks = [];
-const startCallbacks = [];
-
-const simulationConsts = {};
+const simulationConsts = {
+  woodInfoTransfer: 3,
+  
+  sproutCommandsV2: true
+};
 
 function start() {
   const size = +settings.size.value;
@@ -77,7 +78,7 @@ function start() {
   
   renderer = createRenderer(interface, simulation, style);
   
-  startWindow(startCallbacks, frameCallbacks, interface, simulation, renderer);
+  startWindow([], [], interface, simulation, renderer);
   
   setup.hide();
   main.show();

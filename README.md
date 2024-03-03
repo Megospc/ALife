@@ -4,7 +4,7 @@
 
 Artifical evolution made with JavaScript.
 
-Idea is taken from the project «Battle Of Clans» by [Simulife Hub](https://youtube.com/@wallcraft-video).
+Idea is taken from the project "Battle Of Clans" by [Simulife Hub](https://youtube.com/@wallcraft-video).
 
 Version: 1.1.0 (01.03.2024)
 
@@ -34,7 +34,7 @@ Version: 1.1.0 (01.03.2024)
 **ALife** is a simulator of evolution of multicellular organisms.
 
 ### Operating Principle
-The entire field is divided into many squares (a «*Tile*»). Each *tile* contains a some amount of resources: *organic* and *charge*. There may also be a living cell (a «*Cell*») on a tile. Each *cell* has its own supply of energy and spends a little of it every turn. If there is not enough energy, the cell dies. When a cell dies, it leaves some *organic* and *charge* (amount of charge = energy that was in the cell) in a 3x3 *tiles* area. If there is  too much *organic* or *charge* in a tile, it becomes *poisoned*. If a cell locates on *poisoning*, it dies. If the *charge* exceeds a certain value, it begins to slowly disappear until it reaches that value.
+The entire field is divided into many squares (a "*Tile*"). Each *tile* contains a some amount of resources: *organic* and *charge*. There may also be a living cell (a "*Cell*") on a tile. Each *cell* has its own supply of energy and consumes a little of it every turn. If there is not enough energy, the cell dies. When a cell dies, it leaves some *organic* and *charge* (amount of charge = energy that was in the cell) in a 3x3 *tile* area. If there is  too much *organic* or *charge* in a tile, it becomes *poisoned*. If a cell is on a *poisoned tile*, it dies. If the *charge* exceeds a certain value, it begins to slowly decrease until it reaches that value.
 
 Cells can be different types:
 + **Leaf**. Each turn gets energy from the sun. The more *organic* there is in a *tile* under a leaf, the more energy it can get. If two leaves touch, they both stop producing energy.
@@ -54,16 +54,19 @@ By opening the [home page](https://megospc.github.io/ALife/index.html?lang=eng),
 + **Initial density**. Density of location of the first shoots. 1/9 means that on every ninth *tile* (on the average) will be a shoot. 1/6 - on every sixth, 1/50 - on every fiftieth, etc.
 + **Organic, charge**. The amount of organic and charge that will be in each tile when the simulation starts.
 
-Once you have set up the simulation, click the «start» button.
+Once you have configured the parameters, click the "Start" button.
 
 <img width="300" src="images/description2en.png">
 
 1. Levers for adjusting zoom/speed.
-2. Buttons. "Pause/Continue" stops/resumes the simulation. “To Center” resets the zoom and camera position. “Snapshot” downloads a snapshot of the view window.
-3. Statistics. “Iteration” is the number of the current simulation frame. “Population” is the current number of cells in the simulation. "FPS" - average number of frames per second.
-4. Rendering modes. Change the color of cells/tiles. “Drawing mode” for cells and “Ground drawing mode” for tiles.
+2. Buttons. "Pause/Continue" stops/resumes the simulation. "To Center" resets the zoom and camera position. "Snapshot" downloads a snapshot of the view window.
+3. Statistics. "Iteration" is the number of the current simulation frame. "Population" is the current number of cells in the simulation. "FPS" - average number of frames per second.
+4. Rendering modes. Change the color of cells/tiles. "Drawing mode" for cells and "Ground drawing mode" for tiles.
 5. View window. Here you can see what is happening in the simulation. Hold and move the mouse to change the camera's position. You can also click on any tile to see information about it.
 6. Disable rendering. If checked, the view window is hidden.
 7. Productivity and simulation seed.
+
+### Sandbox
+In the sandbox, you can look at the growth of one species separately. To go to the sandbox, select a tile with a shoot or a seed and click the "Save" button. After this, the sandbox will open in a new tab. The genome of the selected shoot (seed) will be loaded into it. You can change the name/description of the species, save it as a file by clicking the "Download" button and run it. To do last, configure the parameters and click "Start". Once you have saved the species file, you can open it by following the "Sandbox" link on the home page and selecting it.
 
 *If someting isn't clear enough, please, write about it in Issues.*

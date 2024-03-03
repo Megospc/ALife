@@ -1,5 +1,7 @@
 function setupInterface(main, simulation, props = {}) {
   const obj = {
+    simulation,
+    
     paused: false,
     cameraX: 0,
     cameraY: 0,
@@ -70,8 +72,9 @@ function setupInterface(main, simulation, props = {}) {
   obj.theme = new SelectElement(strings.rendermodeHeader, [
     ["default", strings.rendermodeValues[0]],
     ["energy", strings.rendermodeValues[1]],
-    ["clan", strings.rendermodeValues[2]],
-    ["nothing", strings.rendermodeValues[3]]
+    ["contrast", strings.rendermodeValues[2]],
+    ["clan", strings.rendermodeValues[3]],
+    ["nothing", strings.rendermodeValues[4]]
   ], "default").attr("onchange", () => obj.changed = true).to(obj.themes);
   obj.backtheme = new SelectElement(strings.groundmodeHeader, [
     ["default", strings.groundmodeValues[0]],
@@ -118,7 +121,11 @@ function setupInterface(main, simulation, props = {}) {
     window.open("sandbox.html?lang="+obj.language);
   }).to(obj.infobtns);
   
-  obj.addonenergydiv = new DivElement().to(obj.undercanvas);
+  obj.energydiv = new DivElement().to(obj.undercanvas);
+  obj.energyorganic = new StatElement(strings.energyOrganic, 0).to(obj.energydiv);
+  obj.energycharge = new StatElement(strings.energyCharge, 0).to(obj.energydiv);
+  obj.energyenergy = new StatElement(strings.energyEnergy, 0).to(obj.energydiv);
+  obj.energysum = new StatElement(strings.energySum, 0).to(obj.energydiv);
   
   obj.renderoff = new CheckInput(strings.renderoff, false).to(obj.undercanvas);
   obj.rendertime = new StatElement(strings.rendertime, 0, strings.ms).to(obj.undercanvas);
@@ -301,8 +308,8 @@ function setupInterface(main, simulation, props = {}) {
       if (e.code.includes("Digit")) {
         const v = +e.code[5];
         
-        if (seltheme && v < 3) obj.theme.value = ["nothing", "default", "energy", "clan"][v];
-        if (selbacktheme && v < 4) obj.backtheme.value = ["nothing", "default", "posions", "organic", "charge"][v];
+        if (seltheme && v < 5) obj.theme.value = ["nothing", "default", "energy", "contrast", "clan"][v];
+        if (selbacktheme && v < 5) obj.backtheme.value = ["nothing", "default", "poisons", "organic", "charge"][v];
         
         obj.changed = true;
       }
@@ -460,9 +467,12 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
   return setInterval(() => {
     const renderstart = performance.now();
     
-    if (interface.renderoff.value) interface.canvasdiv.hide();
-    else {
+    if (interface.renderoff.value) {
+      interface.canvasdiv.hide();
+      interface.energydiv.hide();
+    } else {
       interface.canvasdiv.show();
+      interface.energydiv.show();
       
       const zoom = interface.getZoom();
       
@@ -474,9 +484,11 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
         
         interface.changed = false;
       }
+      
+      updateSimulationEnergy(interface);
     }
     
-    updateSelectInfo(interface, simulation);
+    updateSelectInfo(interface);
     
     const rendertime = performance.now()-renderstart;
     
@@ -510,7 +522,35 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
   }, 15);
 }
 
-function updateSelectInfo(interface, simulation) {
+function updateSimulationEnergy(interface) {
+  const simulation = interface.simulation;
+  
+  const consts = simulation.consts;
+  
+  const organicCost = consts.organicCost;
+  
+  let organic = 0;
+  let charge = 0;
+  let energy = 0;
+  
+  for (let i = 0; i < simulation.energy.length; i++) {
+    if (simulation.type[i]) energy += simulation.energy[i];
+    
+    organic += simulation.organic[i];
+    charge += simulation.charge[i];
+  }
+  
+  const sum = organic+charge+energy;
+  
+  interface.energyorganic.value = bigNumberString(organic);
+  interface.energycharge.value = bigNumberString(charge);
+  interface.energyenergy.value = bigNumberString(energy);
+  interface.energysum.value = bigNumberString(sum);
+}
+
+function updateSelectInfo(interface) {
+  const simulation = interface.simulation;
+  
   const methods = simulation.methods;
   
   const consts = simulation.consts;
@@ -518,6 +558,8 @@ function updateSelectInfo(interface, simulation) {
   const genomeWidth = consts.genomeWidth;
   const genomeHeight = consts.genomeHeight;
   const genomeLength = genomeHeight*genomeWidth;
+  
+  const woodInfoTransfer = consts.woodInfoTransfer;
   
   const maxOrganic = consts.maxOrganic;
   const maxCharge = consts.maxCharge;
@@ -613,12 +655,14 @@ function updateSelectInfo(interface, simulation) {
       }
       
       println();
+      
+      if (woodInfoTransfer) printheader(strings.infoWoodinfoHeader, simulation.woodinfo[i]);
     }
     
     if (type === 2) {
       printgenome();
       
-      printheader(strings.infoEnergyHeader, simulation.energy[i]);
+      printheader(strings.infoEnergyHeader, simulation.energy[i]+"/"+sproutFallEnergy);
       printheader(strings.infoCurrentHeader, simulation.curprog[i]+":"+simulation.current[i]+"/"+genomeWidth);
       printheader(strings.infoMutationsHeader, simulation.mutations[i]);
     }
@@ -626,7 +670,7 @@ function updateSelectInfo(interface, simulation) {
     if (type === 3 || type === 4) {
       printgenome();
       
-      printheader(strings.infoEnergyHeader, simulation.energy[i]);
+      printheader(strings.infoEnergyHeader, simulation.energy[i]+"/"+seedFallEnergy);
       printheader(strings.infoCurprogHeader, simulation.curprog[i]);
       printheader(strings.infoMutationsHeader, simulation.mutations[i]);
       

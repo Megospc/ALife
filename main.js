@@ -22,6 +22,8 @@ function getSimulationMethods(simulation) {
   
   const mutationChance = consts.mutationChance;
   
+  const deathOnPotionDestroysIt = consts.deathOnPotionDestroysIt;
+  
   return {
     ...randomGenerater(simulation), // Методы рандома
     
@@ -136,7 +138,7 @@ function getSimulationMethods(simulation) {
       const f = (x, y) => {
         const j = this.posIndex(cx+x, cy+y);
         
-        data[j] += add;
+        if (data[j]+add >= 0) data[j] += add;
         
         if (simulation.type[j] > 0) this.deadByPotionTest(j);
       };
@@ -169,7 +171,7 @@ function getSimulationMethods(simulation) {
     
     deadByPotionTest(i) {
       if (simulation.organic[i] >= maxOrganic) {
-        if (simulation.type[i] !== 6) this.dead(i);
+        if (simulation.type[i] !== 6) this.dead(i, deathOnPotionDestroysIt ? -1:1);
       } else if (simulation.charge[i] >= maxCharge && simulation.type[i] !== 7) this.dead(i);
     },
     
@@ -215,6 +217,7 @@ function iteration(simulation) {
   const maxOrganic = consts.maxOrganic;
   const addOrganic = consts.addOrganic;
   const organicCost = consts.organicCost;
+  const organicMoving = consts.organicMoving;
   
   const maxCharge = consts.maxCharge;
   const chargeAvg = consts.chargeAvg;
@@ -222,11 +225,14 @@ function iteration(simulation) {
   const chargeNoUp = consts.chargeNoUp;
   
   const woodConsumption = consts.woodConsumption;
+  const woodInfoTransfer = consts.woodInfoTransfer;
   
   const sproutCost = consts.sproutCost;
   const sproutConsumption = consts.sproutConsumption;
   const sproutFallEnergy = consts.sproutFallEnergy;
   const sproutOrganicEat = consts.sproutOrganicEat;
+  
+  const sproutCommandsV2 = consts.sproutCommandsV2;
   
   const seedCost = consts.seedCost;
   const seedConsumption = consts.seedConsumption;
@@ -276,6 +282,8 @@ function iteration(simulation) {
   const pwoodgived = simulation.woodgived;
   const pparentwood = simulation.parentwood;
   const pparentwooduniq = simulation.parentwooduniq;
+  const pwoodinfo = simulation.woodinfo;
+  const pwoodninfo = simulation.woodninfo;
   
   clearBenchmark();
   
@@ -388,7 +396,7 @@ function iteration(simulation) {
         change = 1;
         finish = true;
       }
-      if (command === 1 || command === 31 || command === 30 || command === 29) { // Рост
+      if (command === 1 || command === 31 || command === 30 || command === 29 || ((command === 28 || command === 27) && sproutCommandsV2)) { // Рост
         const i4 = i << 2;
         
         function getCost(j) {
@@ -413,6 +421,8 @@ function iteration(simulation) {
         }
         
         penergy[i] -= cost;
+        
+        pwoodinfo[i] = 0;
         
         pwoodshape[i4] = 0;
         pwoodshape[i4+1] = 0;
@@ -509,9 +519,19 @@ function iteration(simulation) {
       if (command === 2) { // Поворот
         if (isManycell) change = getCommand(3);
         else {
-          const angle = correctAngle(pangle[i]+((getCommand(1) & 1) ? 1:-1));
-          
-          pangle[i] = angle;
+          if (sproutCommandsV2) {
+            const v = getCommand(1)%3;
+            
+            const angle = correctAngle(pangle[i]+(v === 2 ?
+              (methods.chance(0.5) ? 1:-1):v
+            ));
+            
+            pangle[i] = angle;
+          } else {
+            const angle = correctAngle(pangle[i]+((getCommand(1) & 1) ? 1:-1));
+            
+            pangle[i] = angle;
+          }
           
           change = getCommand(2);
         }
@@ -621,9 +641,6 @@ function iteration(simulation) {
             
             const l = (k << 2)+iang;
             
-            pcurprog[i] = getCommand(2)%genomeHeight;
-            pcurrent[i] = 0;
-            
             pangle[i] = iang;
             
             pparentwood[i] = angle;
@@ -631,6 +648,9 @@ function iteration(simulation) {
             
             pwoodshape[l] = 0b10;
             pwooduniqs[l] = puniq[i];
+            
+            change = getCommand(2);
+            finsih = true;
           } else change = getCommand(3);
         }
       }
@@ -677,6 +697,56 @@ function iteration(simulation) {
       }
       if (command === 16) { // Компос
         change = getCommand(pangle[i]);
+      }
+      
+      if (sproutCommandsV2) { // Команды 2.0
+        if (command === 17) { // Передача информации
+          if (isManycell) {
+            pwoodinfo[parenti] = getCommand(1)%woodInfoTransfer;
+            
+            change = getCommand(2);
+          } else change = getCommand(3);
+        }
+        
+        if (command === 18) { // Получение информации
+          if (isManycell) {
+            if (pwoodinfo[parenti] === getCommand(1)) change = getCommand(2);
+            else change = getCommand(3);
+          } else change = getCommand(4);
+        }
+        
+        if (command === 19) { // Передвижение органики
+          const anglep = getCommand(1)%5;
+          
+          const targang = correctAngle(pangle[i]+anglep);
+          const tari = anglep === 4 ? i:methods.nearIndexByAngle(i, targang);
+          
+          function move(angle) {
+            const ang = correctAngle(pangle[i]+angle);
+            
+            const k = angle === 4 ? i:methods.nearIndexByAngle(i, ang);
+            
+            if (k !== tari) {
+              if (sorganic[k] >= organicMoving) {
+                sorganic[tari] += organicMoving;
+                sorganic[k] -= organicMoving;
+              } else {
+                sorganic[tari] += sorganic[k];
+                sorganic[k] = 0;
+              }
+            }
+          }
+          
+          move(0);
+          move(1);
+          move(2);
+          move(3);
+          move(4);
+          
+          change = getCommand(2);
+          
+          finish = true;
+        }
       }
       
       pcurrent[i] = (pcurrent[i]+change)%genomeWidth;
@@ -760,6 +830,8 @@ function iteration(simulation) {
     const i = simulation.news.pop();
     
     simulation.isNew[i] = 0;
+    
+    methods.deadByPotionTest(i);
   }
   
   closeBenchmark();
@@ -804,6 +876,8 @@ function iteration(simulation) {
           }
         }
       }
+      
+      pwoodninfo[i] = pwoodinfo[i];
       
       pnenergy[i] = 0;
       
@@ -884,12 +958,20 @@ function iteration(simulation) {
           penergy[i] -= giving;
           
           pwoodgived[l] = giving;
+          
+          if (shape === 0b11 && pwoodinfo[i] > 0) {
+            pwoodninfo[k] = pwoodinfo[i];
+            
+            pwoodgived[i] = 0;
+          }
         }
       }
     });
     
     methods.eachCellOfType("WoodTaking", [1], i => {
       penergy[i] += pnenergy[i];
+      
+      pwoodinfo[i] = pwoodninfo[i];
       
       if (penergy[i] < woodConsumption) {
         penergy[i] = 0;
@@ -943,13 +1025,15 @@ function iteration(simulation) {
 function getSimulationConsts(consts) {
   return {
     mutationChance: consts.mutationChance ?? 0.2,
+    deathOnPotionDestroysIt: consts.deathOnPotionDestroysIt ?? false,
     
     genomeWidth: consts.genomeWidth ?? 50,
-    genomeHeight: consts.genomeHeight ?? 5,
+    genomeHeight: consts.genomeHeight ?? 1,
     
     maxOrganic: consts.maxOrganic ?? 250,
     addOrganic: consts.addOrganic ?? 1,
     organicCost: consts.organicCost ?? 200,
+    organicMoving: consts.organicMoving ?? 5,
     
     maxCharge: consts.maxCharge ?? 50000,
     chargeAvg: consts.chargeAvg ?? 10000,
@@ -957,6 +1041,7 @@ function getSimulationConsts(consts) {
     chargeNoUp: consts.chargeNoUp ?? true,
     
     woodConsumption: consts.woodConsumption ?? 10,
+    woodInfoTransfer: consts.woodInfoTransfer ?? 0,
     
     leafCost: consts.leafCost ?? 3500,
     leafConsumption: consts.leafConsumption ?? 10,
@@ -979,6 +1064,8 @@ function getSimulationConsts(consts) {
     sproutConsumption: consts.sproutConsumption ?? 50,
     sproutFallEnergy: consts.sproutFallEnergy ?? 50000,
     sproutOrganicEat: consts.sproutOrganicEat ?? 100,
+    
+    sproutCommandsV2: consts.sproutCommandsV2 ?? false,
     
     seedCost: consts.seedCost ?? 3000,
     seedConsumption: consts.seedConsumption ?? 5,
@@ -1015,6 +1102,8 @@ function createSimulation(width, height, consts, seed) {
     woodshape: new Uint8Array(cells*4),
     wooduniqs: new Uint32Array(cells*4),
     woodgived: new Uint32Array(cells*4),
+    woodinfo: new Uint8Array(cells),
+    woodninfo: new Uint8Array(cells),
     
     parentwood: new Uint8Array(cells),
     parentwooduniq: new Uint32Array(cells),

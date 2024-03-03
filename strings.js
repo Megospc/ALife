@@ -65,6 +65,7 @@ const languagesStrings = {
     rendermodeValues: [
       "По умолчанию",
       "Энергия",
+      "Контраст",
       "Клан",
       "Ничего"
     ],
@@ -84,6 +85,11 @@ const languagesStrings = {
     handletime: "Время обработки",
     seed: "Семя",
     ms: "мс",
+    
+    energyOrganic: "Органика",
+    energyCharge: "Заряд",
+    energyEnergy: "Энергия",
+    energySum: "Сумма",
     
     infoTypes: [
       "ДРЕВЕСИНА",
@@ -108,6 +114,7 @@ const languagesStrings = {
     infoOrganicHeader: "Органика",
     infoChargeHeader: "Заряд",
     infoSunHeader: "Солнце",
+    infoWoodinfoHeader: "Информация",
     
     sandboxHeader: "Песочница",
     sandboxName: "Название",
@@ -189,6 +196,7 @@ const languagesStrings = {
     rendermodeValues: [
       "Default",
       "Energy",
+      "Contrast",
       "Clan",
       "Nothing"
     ],
@@ -208,6 +216,11 @@ const languagesStrings = {
     handletime: "Processing time",
     seed: "Seed",
     ms: "ms",
+    
+    energyOrganic: "Organic",
+    energyCharge: "Charge",
+    energyEnergy: "Energy",
+    energySum: "Total",
     
     infoTypes: [
       "WOOD",
@@ -232,6 +245,7 @@ const languagesStrings = {
     infoOrganicHeader: "Organic",
     infoChargeHeader: "Charge",
     infoSunHeader: "Sun",
+    infoWoodinfoHeader: "Information",
     
     sandboxHeader: "Sandbox",
     sandboxName: "Name",
