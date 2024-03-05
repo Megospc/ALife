@@ -6,7 +6,7 @@
 
 Идея основана на проекте «Борьба Кланов» от [foo52ru](https://youtube.com/@foo52ru).
 
-Версия: 1.1.0 (01.03.2024)
+Версия: 1.2.5 (05.03.2024)
 
 [**ДЕМОВЕРСИЯ**](https://megospc.github.io/ALife/demo.html?lang=ru)\
 [**ПОЛНАЯ ВЕРСИЯ**](https://megospc.github.io/ALife/index.html?lang=ru)

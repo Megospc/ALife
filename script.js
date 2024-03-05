@@ -25,7 +25,17 @@ settings.randomSeed();
 const simulationConsts = {
   woodInfoTransfer: 3,
   
-  sproutCommandsV2: true
+  sproutEatEnergyPart: 0.8,
+  sproutCommandsV2: true,
+  
+  seedShootCanKillNearby: true,
+  
+  genomeHeight: 7,
+  genomeWidth: 40,
+  
+  sproutDefaultProg: 2,
+  
+  chargeStep: 1
 };
 
 function start() {

@@ -148,8 +148,8 @@ function render(renderer) {
         
         ctx.fillStyle = style.grid;
         
-        for (let x = sx; x <= ex; x++) ctx.fillRect(scaleX(x-0.5)-gridw/2, 0, gridw, canvash);
-        for (let y = sy; y <= ey; y++) ctx.fillRect(0, scaleY(y-0.5)-gridw/2, canvasw, gridw);
+        for (let x = sx; x < ex; x++) ctx.fillRect(scaleX(x-0.5)-gridw/2, 0, gridw, canvash);
+        for (let y = sy; y < ey; y++) ctx.fillRect(0, scaleY(y-0.5)-gridw/2, canvasw, gridw);
       } else {
         ctx.fillStyle = style.grid;
         ctx.fillRect(0, 0, canvasw, canvash);
@@ -159,7 +159,7 @@ function render(renderer) {
       ctx.fillRect(0, 0, canvasw, canvash);
     }
     
-    if (backtheme === "default") for (let x = sx; x < ex; x++) for (let y = sy; y <= ey; y++) {
+    if (backtheme === "default") for (let x = sx; x < ex; x++) for (let y = sy; y < ey; y++) {
       const i = x+y*width;
       
       const organic = simulation.organic[i];
@@ -173,7 +173,7 @@ function render(renderer) {
       
       ctx.fillRect(scaleX(x-0.5)+gridw/2, scaleY(y-0.5)+gridw/2, cellsize-gridw, cellsize-gridw);
     }
-    if (backtheme === "poisons") for (let x = sx; x < ex; x++) for (let y = sy; y <= ey; y++) {
+    if (backtheme === "poisons") for (let x = sx; x < ex; x++) for (let y = sy; y < ey; y++) {
       const i = x+y*width;
       
       const organic = simulation.organic[i];
@@ -187,7 +187,7 @@ function render(renderer) {
       
       ctx.fillRect(scaleX(x-0.5)+gridw/2, scaleY(y-0.5)+gridw/2, cellsize-gridw, cellsize-gridw);
     }
-    if (backtheme === "organic") for (let x = sx; x < ex; x++) for (let y = sy; y <= ey; y++) {
+    if (backtheme === "organic") for (let x = sx; x < ex; x++) for (let y = sy; y < ey; y++) {
       const i = x+y*width;
       
       const organic = simulation.organic[i];
@@ -197,7 +197,7 @@ function render(renderer) {
       
       ctx.fillRect(scaleX(x-0.5)+gridw/2, scaleY(y-0.5)+gridw/2, cellsize-gridw, cellsize-gridw);
     }
-    if (backtheme === "charge") for (let x = sx; x < ex; x++) for (let y = sy; y <= ey; y++) {
+    if (backtheme === "charge") for (let x = sx; x < ex; x++) for (let y = sy; y < ey; y++) {
       const i = x+y*width;
       
       const charge = simulation.charge[i];
@@ -213,7 +213,7 @@ function render(renderer) {
       
       ctx.lineCap = "square";
       
-      for (let x = sx-1; x <= ex; x++) for (let y = sy-1; y <= ey; y++) {
+      for (let x = sx; x < ex; x++) for (let y = sy; y < ey; y++) {
         const i = x+y*width;
         
         const type = simulation.type[i];
@@ -252,7 +252,7 @@ function render(renderer) {
         }
       }
       
-      for (let x = sx; x < ex; x++) for (let y = sy; y <= ey; y++) {
+      for (let x = sx; x < ex; x++) for (let y = sy; y < ey; y++) {
         const i = x+y*width;
         
         const type = simulation.type[i];
@@ -276,7 +276,7 @@ function render(renderer) {
     }
     
     if (theme === "clan") {
-      for (let x = sx; x < ex; x++) for (let y = sy; y <= ey; y++) {
+      for (let x = sx; x < ex; x++) for (let y = sy; y < ey; y++) {
         const i = x+y*width;
         
         const type = simulation.type[i];
@@ -290,7 +290,7 @@ function render(renderer) {
     }
     
     if (interface.selectType === "tile") drawSelect(interface.selectIndex%width, Math.floor(interface.selectIndex/width));
-    if (interface.selectType === "cell") for (let x = sx; x < ex; x++) for (let y = sy; y <= ey; y++) {
+    if (interface.selectType === "cell") for (let x = sx; x < ex; x++) for (let y = sy; y < ey; y++) {
       const i = x+y*width;
       
       if (interface.selectType === "cell" && interface.selectUniq === simulation.uniq[i]) {
@@ -377,7 +377,7 @@ function render(renderer) {
       const sy = Math.max(Math.floor(-canvash/2/cellsize+cameraY+height/2), 0);
       const ey = Math.min(Math.ceil(canvash/2/cellsize+cameraY+height/2), height);
       
-      for (let x = sx; x < ex; x++) for (let y = sy; y <= ey; y++) {
+      for (let x = sx; x < ex; x++) for (let y = sy; y < ey; y++) {
         const i = x+y*width;
         
         const type = simulation.type[i];

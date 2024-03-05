@@ -6,7 +6,7 @@ Artifical evolution made with JavaScript.
 
 Idea is taken from the project "Battle Of Clans" by [Simulife Hub](https://youtube.com/@wallcraft-video).
 
-Version: 1.1.0 (01.03.2024)
+Version: 1.2.5 (05.03.2024)
 
 [**DEMOVERSION**](https://megospc.github.io/ALife/demo.html?lang=en)\
 [**FULL VERSION**](https://megospc.github.io/ALife/index.html?lang=en)

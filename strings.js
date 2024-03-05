@@ -83,6 +83,7 @@ const languagesStrings = {
     renderoff: "Без отрисовки",
     rendertime: "Время отрисовки",
     handletime: "Время обработки",
+    performance: "Производительность",
     seed: "Семя",
     ms: "мс",
     
@@ -115,6 +116,7 @@ const languagesStrings = {
     infoChargeHeader: "Заряд",
     infoSunHeader: "Солнце",
     infoWoodinfoHeader: "Информация",
+    infoUniqHeader: "ID",
     
     sandboxHeader: "Песочница",
     sandboxName: "Название",
@@ -214,6 +216,7 @@ const languagesStrings = {
     renderoff: "No rendering",
     rendertime: "Rendering time",
     handletime: "Processing time",
+    performance: "Productivity",
     seed: "Seed",
     ms: "ms",
     
@@ -246,6 +249,7 @@ const languagesStrings = {
     infoChargeHeader: "Charge",
     infoSunHeader: "Sun",
     infoWoodinfoHeader: "Information",
+    infoUniqHeader: "ID",
     
     sandboxHeader: "Sandbox",
     sandboxName: "Name",

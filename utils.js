@@ -225,15 +225,15 @@ function fixedString(str, length) {
   return str;
 }
 
-function bigNumberString(n) {
+function bigNumberString(n, len = 2, names) {
   if (n === 0) return "0";
   if (n < 0) return "-"+bigNumberString(-n);
   
   const log = Math.floor(Math.log10(n)/3);
   
-  const names = ["", "K", "M", "B", "T", "Q"];
+  names ??= ["", "K", "M", "B", "T", "Q"];
   
-  return (n/(1000**log)).toFixed(log ? 2:0)+names[log];
+  return (n/(1000**log)).toFixed(log ? len:0)+names[log];
 }
 
 function filesizeString(size) {

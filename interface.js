@@ -130,6 +130,7 @@ function setupInterface(main, simulation, props = {}) {
   obj.renderoff = new CheckInput(strings.renderoff, false).to(obj.undercanvas);
   obj.rendertime = new StatElement(strings.rendertime, 0, strings.ms).to(obj.undercanvas);
   obj.handletime = new StatElement(strings.handletime, 0, strings.ms).to(obj.undercanvas);
+  obj.performance = new StatElement(strings.performance, 0).to(obj.undercanvas);
   obj.seed = new StatElement(strings.seed, simulation.seed).to(obj.undercanvas);
   
   obj.getZoom = function() {
@@ -253,7 +254,7 @@ function setupInterface(main, simulation, props = {}) {
       obj.changed = true;
     });
     
-    document.addEventListener("keydown", e => {
+    obj.main.event("keydown", e => {
       if (e.ctrlKey) return;
       
       if (e.code == "Space" || e.code.includes("Arrow")) e.preventDefault();
@@ -315,7 +316,7 @@ function setupInterface(main, simulation, props = {}) {
       }
     });
     
-    document.addEventListener("keyup", e => {
+    obj.main.event("keyup", e => {
       if (e.ctrlKey) return;
       
       switch (e.code) {
@@ -505,8 +506,11 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
     interface.frame.value = simulation.frame;
     interface.population.value = simulation.population;
     
-    interface.rendertime.value = rendertime.toFixed(1);
-    interface.handletime.value = handletime.toFixed(1);
+    interface.rendertime.value = Math.ceil(rendertime);
+    interface.handletime.value = Math.ceil(handletime);
+    
+    if (interface.paused) interface.performance.value = "0cps";
+    else interface.performance.value = bigNumberString(simulation.population/(handletime/1000), 1, ["cps", "kps", "mps", "gps", "tps"]);
     
     for (let i = 0; i < frameCallbacks.length; i++) frameCallbacks[i]();
     
@@ -536,7 +540,7 @@ function updateSimulationEnergy(interface) {
   for (let i = 0; i < simulation.energy.length; i++) {
     if (simulation.type[i]) energy += simulation.energy[i];
     
-    organic += simulation.organic[i];
+    organic += simulation.organic[i]*organicCost;
     charge += simulation.charge[i];
   }
   
@@ -687,6 +691,7 @@ function updateSelectInfo(interface) {
     
     printheader(strings.infoPlaceidHeader, simulation.placeid[i]);
     printheader(strings.infoClanHeader, simulation.clan[i]);
+    printheader(strings.infoUniqHeader, simulation.uniq[i]);
     
     if (type !== 1) printheader(strings.infoAngleHeader, strings.angleNames[simulation.angle[i]]);
     

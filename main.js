@@ -175,10 +175,11 @@ function getSimulationMethods(simulation) {
       } else if (simulation.charge[i] >= maxCharge && simulation.type[i] !== 7) this.dead(i);
     },
     
-    dead(i, organic = 1) {
+    dead(i, organic = 1, charge = 1) {
       if (!simulation.isDead[i]) {
         simulation.deaths.push(i);
         simulation.deaths.push(organic);
+        simulation.deaths.push(charge);
         
         simulation.isDead[i] = 1;
       }
@@ -231,6 +232,8 @@ function iteration(simulation) {
   const sproutConsumption = consts.sproutConsumption;
   const sproutFallEnergy = consts.sproutFallEnergy;
   const sproutOrganicEat = consts.sproutOrganicEat;
+  const sproutEatEnergyPart = consts.sproutEatEnergyPart;
+  const sproutDefaultProg = consts.sproutDefaultProg;
   
   const sproutCommandsV2 = consts.sproutCommandsV2;
   
@@ -241,6 +244,7 @@ function iteration(simulation) {
   const seedShootDistance = consts.seedShootDistance;
   const seedShootBaseCost = consts.seedShootBaseCost;
   const seedShootDistanceCost = consts.seedShootDistanceCost;
+  const seedShootCanKillNearby = consts.seedShootCanKillNearby;
   
   const leafCost = consts.leafCost;
   const leafInitial = consts.leafInitial;
@@ -289,7 +293,7 @@ function iteration(simulation) {
   
   startBenchmark("ChargeAvg");
   
-  for (let i = 0; i < scharge.length; i++) {
+  if (chargeStep) for (let i = 0; i < scharge.length; i++) {
     const d = scharge[i]-chargeAvg;
     
     if (d < chargeStep && d > -chargeStep) {
@@ -392,6 +396,13 @@ function iteration(simulation) {
       let change = raw;
       let finish = false;
       
+      function getProg(j) {
+        const v = getCommand(j)%(genomeHeight+sproutDefaultProg);
+        
+        if (v < genomeHeight) return v;
+        else return 0;
+      }
+      
       if (command === 0) { // Ожидание
         change = 1;
         finish = true;
@@ -466,7 +477,7 @@ function iteration(simulation) {
               methods.copyGenome(k, i);
               
               penergy[k] = producerAvg;
-              pcurprog[k] = getCommand(j+5)%genomeHeight;
+              pcurprog[k] = getProg(j+5);
               
               shape = 0b10;
             }
@@ -476,7 +487,7 @@ function iteration(simulation) {
               methods.copyGenome(k, i);
               
               penergy[k] = producerAvg;
-              pcurprog[k] = getCommand(j+5)%genomeHeight;
+              pcurprog[k] = getProg(j+5);
               pseedshoot[k] = getCommand(j+8)%seedShootDistance+1;
               
               shape = 0b10;
@@ -487,7 +498,7 @@ function iteration(simulation) {
               methods.copyGenome(k, i);
               
               penergy[k] = producerAvg;
-              pcurprog[k] = getCommand(j+5)%genomeHeight;
+              pcurprog[k] = getProg(j+5);
               pcurrent[k] = 0;
               
               shape = 0b10;
@@ -562,9 +573,9 @@ function iteration(simulation) {
         const k = methods.nearIndexByAngle(i, angle);
         
         if (!simulation.isNew[k] && !simulation.isDead[i] && ptype[k] > 1) {
-          penergy[i] += organicCost*9;
+          penergy[i] += organicCost*9+sproutEatEnergyPart*penergy[k];
           
-          methods.dead(k, 0);
+          methods.dead(k, 0, 1-sproutEatEnergyPart);
           
           change = getCommand(2);
           
@@ -583,8 +594,11 @@ function iteration(simulation) {
           const angle = correctAngle(pangle[i]+getCommand(1));
           const k = methods.nearIndexByAngle(i, angle);
           
-          if (ptype[k] > 0) change = getCommand(6);
-          else {
+          if (ptype[k] > 0) {
+            change = getCommand(6);
+            
+            if (seedShootCanKillNearby) methods.dead(k);
+          } else {
             methods.putNewCellIndex(4, k);
             
             methods.copyGenome(k, i);
@@ -608,8 +622,7 @@ function iteration(simulation) {
         }
       }
       if (command === 6) { // Отвалиться
-        if (isManycell) change = getCommand(2);
-        else {
+        if (isManycell) {
           methods.deleteCell(i);
           methods.putNewCellIndex(2, i);
           
@@ -617,7 +630,7 @@ function iteration(simulation) {
           pcurrent[i] = 0;
           
           return;
-        }
+        } else change = getCommand(2);
       }
       if (command === 7) { // Съесть органику
         if (sorganic[i] > 0 && !isManycell) {
@@ -650,7 +663,8 @@ function iteration(simulation) {
             pwooduniqs[l] = puniq[i];
             
             change = getCommand(2);
-            finsih = true;
+            
+            finish = true;
           } else change = getCommand(3);
         }
       }
@@ -660,7 +674,7 @@ function iteration(simulation) {
         change = 0;
       }
       if (command === 10) { // Сменить программу
-        pcurprog[i] = getCommand(1)%genomeHeight;
+        pcurprog[i] = getProg(1);
         pcurrent[i] = 0;
         
         change = 0;
@@ -959,11 +973,7 @@ function iteration(simulation) {
           
           pwoodgived[l] = giving;
           
-          if (shape === 0b11 && pwoodinfo[i] > 0) {
-            pwoodninfo[k] = pwoodinfo[i];
-            
-            pwoodgived[i] = 0;
-          }
+          if (shape === 0b11 && pwoodinfo[i] > 0) pwoodninfo[k] = pwoodinfo[i];
         }
       }
     });
@@ -1006,13 +1016,14 @@ function iteration(simulation) {
   startBenchmark("Death");
   
   while (simulation.deaths.length > 0) {
+    const charge = simulation.deaths.pop();
     const organic = simulation.deaths.pop();
     const i = simulation.deaths.pop();
     
     methods.deleteCell(i);
     
     methods.addResource(simulation.organic, i, addOrganic*organic);
-    if (penergy[i] > 0) methods.addResource(simulation.charge, i, Math.floor(penergy[i]/9));
+    if (penergy[i] > 0) methods.addResource(simulation.charge, i, Math.floor(penergy[i]/9*charge));
     
     ptype[i] = 0;
   }
@@ -1028,7 +1039,7 @@ function getSimulationConsts(consts) {
     deathOnPotionDestroysIt: consts.deathOnPotionDestroysIt ?? false,
     
     genomeWidth: consts.genomeWidth ?? 50,
-    genomeHeight: consts.genomeHeight ?? 1,
+    genomeHeight: consts.genomeHeight ?? 5,
     
     maxOrganic: consts.maxOrganic ?? 250,
     addOrganic: consts.addOrganic ?? 1,
@@ -1064,12 +1075,15 @@ function getSimulationConsts(consts) {
     sproutConsumption: consts.sproutConsumption ?? 50,
     sproutFallEnergy: consts.sproutFallEnergy ?? 50000,
     sproutOrganicEat: consts.sproutOrganicEat ?? 100,
+    sproutEatEnergyPart: consts.sproutEatEnergyPart ?? 0,
+    sproutDefaultProg: consts.sproutDefaultProg ?? 0,
     
     sproutCommandsV2: consts.sproutCommandsV2 ?? false,
     
     seedCost: consts.seedCost ?? 3000,
     seedConsumption: consts.seedConsumption ?? 5,
     seedFallEnergy: consts.seedFallEnergy ?? 20000,
+    seedShootCanKillNearby: consts.seedShootCanKillNearby ?? false,
     
     seedShootDistance: consts.seedShootDistance ?? 20,
     seedShootBaseCost: consts.seedShootBaseCost ?? 3500,

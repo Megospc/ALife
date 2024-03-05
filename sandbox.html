@@ -77,7 +77,7 @@
     }
   }).to(new DivElement().to(edit));
   
-  new ButtonElement(strings.setupDownload, () => downloadText(getJSON(), obj.name+".alife-species")).to(new DivElement().to(edit));
+  new ButtonElement(strings.setupDownload, () => downloadText(getJSON(), (obj.name ? obj.name:"unnamed")+".alife-species")).to(new DivElement().to(edit));
   
   setupLanguageChanger(new DivElement().to(select), strings, language);
   
