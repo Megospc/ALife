@@ -25,7 +25,7 @@ const languagesStrings = {
       "1000 (Очень высокий)",
       "2000 (Максимальный)"
     ],
-    setupDensityHeader: "Инзначальная плотность",
+    setupDensityHeader: "Изначальная плотность",
     setupDensityValues: [
       "1/3 (Критически высокая)",
       "1/4 (Очень высокая)",
@@ -61,6 +61,7 @@ const languagesStrings = {
     iteration: "Итерация",
     population: "Живых клеток",
     fps: "FPS",
+    clancount: "Живых кланов",
     rendermodeHeader: "Режим отрисовки",
     rendermodeValues: [
       "По умолчанию",
@@ -118,19 +119,33 @@ const languagesStrings = {
     infoWoodinfoHeader: "Информация",
     infoUniqHeader: "ID",
     
+    recordSettings: "Настройки записи",
+    recordOnHeader: "Запись",
+    recordIntervalHeader: "Интервал записи кадров",
+    recordMaxsizeHeader: "Макс. размер (MiB)",
+    recordHeader: "Чтение записи",
+    recordMemory: "Размер записи",
+    recordSave: "сохранить",
+    recordReset: "сбросить",
+    recordStop: "остановить",
+    recordStopAsk: "Вы действительно хотите остановить запись? Это действие нельзя отменить.",
+    recordMaxsizeReached: "Запись достигла максимального размера",
+    
     sandboxHeader: "Песочница",
     sandboxName: "Название",
     sandboxDescription: "Описание",
     
     toMainpage: "Главная страница",
     toSandbox: "Песочница",
+    toRecord: "Чтение записи",
     
     language: "Сменить язык",
     
     angleNames: ["СЕВЕР", "ВОСТОК", "ЮГ", "ЗАПАД"],
     
     memoryAsk: (reqmem) => `Необходимо ${filesizeString(reqmem)} оперативной памяти. Запустить?`,
-    readFileFailed: "Не удалось открыть файл"
+    readFileFailed: "Не удалось открыть файл",
+    webglError: "Упс! Что-то не так с WebGL. Пожалуйста, попробуйте ещё раз или смените браузер/устройство."
   },
   "en": {
     setupHeader: "Settings",
@@ -194,6 +209,7 @@ const languagesStrings = {
     iteration: "Iteration",
     population: "Cells alive",
     fps: "FPS",
+    clancount: "Clans alive",
     rendermodeHeader: "Rendering mode",
     rendermodeValues: [
       "Default",
@@ -251,18 +267,32 @@ const languagesStrings = {
     infoWoodinfoHeader: "Information",
     infoUniqHeader: "ID",
     
+    recordSettings: "Recording settings",
+    recordOnHeader: "Recoreing",
+    recordIntervalHeader: "Recording frame interval",
+    recordMaxsizeHeader: "Maximum size (MiB)",
+    recordHeader: "Recording reader",
+    recordMemory: "Recording size",
+    recordSave: "save",
+    recordReset: "reset",
+    recordStop: "stop",
+    recordStopAsk: "Do you really want to stop the record? You can't undo this.",
+    recordMaxsizeReached: "The record has reached maximum size",
+    
     sandboxHeader: "Sandbox",
     sandboxName: "Name",
     sandboxDescription: "Description",
     
     toMainpage: "Home page",
     toSandbox: "Sandbox",
+    toReader: "Record reader",
     
     language: "Change language",
     
     angleNames: ["NORTH", "EAST", "SOUTH", "WEST"],
     
     memoryAsk: (reqmem) => `It needs ${filesizeString(reqmem)} of RAM. Do you want to start?`,
-    readFileFailed: "Failed to open the file"
+    readFileFailed: "Failed to open the file",
+    webglError: "Oops! Something wrong with WebGL. Please try again or change the browser/device."
   }
 };

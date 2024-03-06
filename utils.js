@@ -225,7 +225,7 @@ function fixedString(str, length) {
   return str;
 }
 
-function bigNumberString(n, len = 2, names) {
+function bigNumberString(n, names) {
   if (n === 0) return "0";
   if (n < 0) return "-"+bigNumberString(-n);
   
@@ -233,7 +233,7 @@ function bigNumberString(n, len = 2, names) {
   
   names ??= ["", "K", "M", "B", "T", "Q"];
   
-  return (n/(1000**log)).toFixed(log ? len:0)+names[log];
+  return (n/(1000**log)).toFixed(log ? 2:0)+names[log];
 }
 
 function filesizeString(size) {
@@ -242,6 +242,12 @@ function filesizeString(size) {
   const names = ["B", "KiB", "MiB", "GiB", "TiB"];
   
   return (size/(1024**log)).toFixed(log ? 1:0)+names[log];
+}
+
+function performanceString(cells, time) {
+  time = Math.max(time, 0.1);
+  
+  return bigNumberString(cells/(time/1000), ["cps", "kps", "mps", "gps", "tps"]);
 }
 
 function download(src, name) {
@@ -261,6 +267,114 @@ function downloadText(text, name) {
   });
   
   downloadBlob(blob, name);
+}
+
+function getBinWriterMethods(arr) {
+  const methods = {
+    data: [],
+    
+    write8(v) {
+      this.data.push(v & 0xFF);
+    },
+    write16(v) {
+      this.write8(v >> 8);
+      this.write8(v);
+    },
+    write32(v) {
+      this.write16(v >> 16);
+      this.write16(v);
+    },
+    
+    compress() {
+      const buf = new Uint8Array(this.data);
+      
+      arr.push(buf);
+      
+      this.data = [];
+      
+      return buf;
+    }
+  };
+  
+  methods.createBitbuf = function() {
+    return {
+      data: [],
+      
+      curoffset: 0,
+      curindex: -1,
+      
+      writeBit(bit) {
+        if (this.curoffset === 0) this.data[++this.curindex] = 0;
+        
+        if (bit === 1) this.data[this.curindex] |= 1 << this.curoffset;
+        
+        this.curoffset = (this.curoffset+1) & 7;
+      },
+      
+      write(v, len) {
+        for (let i = 0; i < len; i++) this.writeBit((v >> i) & 1);
+      },
+      
+      end() {
+        for (let i = 0; i < this.data.length; i++) methods.write8(this.data[i]);
+      }
+    };
+  };
+  
+  return methods;
+}
+
+function getBinReaderMethods(arr) {
+  const methods = {
+    index: 0,
+    
+    read8() {
+      return arr[this.index++];
+    },
+    read16() {
+      return (this.read8() << 8) + this.read8();
+    },
+    read32() {
+      return (this.read16() << 16) + this.read16();
+    },
+    
+    cursor(index) {
+      this.index = index;
+    },
+    
+    get isEnd() {
+      return this.index >= arr.length-1;
+    }
+  };
+  
+  methods.createBitbuf = function() {
+    return {
+      curoffset: 0,
+      curvalue: 0,
+      
+      readBit() {
+        if (this.curoffset === 0) this.curvalue = methods.read8();
+        
+        const v = (this.curvalue >> this.curoffset) & 1;
+        
+        this.curoffset = (this.curoffset+1) & 7;
+        
+        return v;
+      },
+      
+      read(len) {
+        let v = 0;
+        
+        let i = 0;
+        
+        for (let i = 0; i < len; i++) v += this.readBit() << i;
+        
+        return v;
+      }
+    };
+  };
+  
+  return methods;
 }
 
 const benchmarkOn = false;

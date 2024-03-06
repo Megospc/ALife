@@ -6,6 +6,8 @@ const setup = new Element("setup").show();
 const settings = setupSettings("setup", {
   strings,
   
+  record: true,
+  
   onstart: start
 });
 
@@ -14,15 +16,26 @@ new Element({
   href: "sandbox.html?lang="+language,
   className: "pagelink",
   textContent: strings.toSandbox
-}).to(setup);
+}).to(new DivElement().to(setup));
+
+new Element({
+  elementType: "a",
+  href: "record.html?lang="+language,
+  className: "pagelink",
+  textContent: strings.toRecord
+}).to(new DivElement().to(setup));
 
 setupLanguageChanger(new DivElement().to(setup), strings, language);
 
-var simulation, interface, renderer;
+var simulation, interface, renderer, recorder;
 
 settings.randomSeed();
 
 const simulationConsts = {
+  rootCost: 2500,
+  aerialCost: 2500,
+  leafCost: 4000,
+  
   woodInfoTransfer: 3,
   
   sproutEatEnergyPart: 0.8,
@@ -33,9 +46,7 @@ const simulationConsts = {
   genomeHeight: 7,
   genomeWidth: 40,
   
-  sproutDefaultProg: 2,
-  
-  chargeStep: 1
+  sproutDefaultProg: 2
 };
 
 function start() {
@@ -43,7 +54,8 @@ function start() {
   
   const reqmem = (size**2)*512;
   
-  const gib = 2**30;
+  const mib = 1024*1024;
+  const gib = mib*1024;
   
   const devmem = (navigator.deviceMemory ?? 0.5)*gib/2;
   
@@ -83,12 +95,46 @@ function start() {
   interface = setupInterface("main", simulation, {
     strings,
     language,
-    targetsize
+    targetsize,
+    
+    record: settings.recordon.value,
+    
+    recordsave: function() {
+      downloadRecord(recorder);
+    },
+    recordstop: function() {
+      if (confirm(strings.recordStopAsk)) {
+        recordstopped = true;
+        
+        interface.recordstop.hide();
+      }
+    }
   });
   
   renderer = createRenderer(interface, simulation, style);
   
-  startWindow([], [], interface, simulation, renderer);
+  if (settings.recordon.value) recorder = createRecorder(simulation);
+  
+  let recmaxsize = settings.recordmax.value*mib;
+  let recordstopped = false;
+  
+  startWindow([], [
+    function() {
+      if (!recordstopped && settings.recordon.value && simulation.frame%settings.recordinterval.value === 0) {
+        recordFrame(recorder);
+        
+        interface.recordmem.value = filesizeString(recorder.memory)+"/"+filesizeString(recmaxsize);
+        
+        if (recorder.memory >= recmaxsize) {
+          interface.pause.onclick();
+          
+          alert(strings.recordMaxsizeReached);
+          
+          recmaxsize *= 2;
+        }
+      }
+    }
+  ], interface, simulation, renderer);
   
   setup.hide();
   main.show();

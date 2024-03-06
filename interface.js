@@ -63,6 +63,8 @@ function setupInterface(main, simulation, props = {}) {
     };
   }).to(obj.topbuttons);
   
+  if (props.framereset) obj.framereset = new ButtonElement(strings.recordReset, props.framereset).to(obj.topbuttons);
+  
   obj.topstats = new DivElement().to(obj.main);
   obj.frame = new StatElement(strings.iteration, 0).to(obj.topstats);
   obj.population = new StatElement(strings.population, 0).to(obj.topstats);
@@ -121,17 +123,35 @@ function setupInterface(main, simulation, props = {}) {
     window.open("sandbox.html?lang="+obj.language);
   }).to(obj.infobtns);
   
-  obj.energydiv = new DivElement().to(obj.undercanvas);
-  obj.energyorganic = new StatElement(strings.energyOrganic, 0).to(obj.energydiv);
-  obj.energycharge = new StatElement(strings.energyCharge, 0).to(obj.energydiv);
-  obj.energyenergy = new StatElement(strings.energyEnergy, 0).to(obj.energydiv);
-  obj.energysum = new StatElement(strings.energySum, 0).to(obj.energydiv);
+  if (props.bottomstats ?? true) {
+    obj.bottomstats = new DivElement().to(obj.undercanvas);
+    
+    obj.energydiv = new DivElement().to(obj.bottomstats);
+    obj.energyorganic = new StatElement(strings.energyOrganic, 0).to(obj.energydiv);
+    obj.energycharge = new StatElement(strings.energyCharge, 0).to(obj.energydiv);
+    obj.energyenergy = new StatElement(strings.energyEnergy, 0).to(obj.energydiv);
+    obj.energysum = new StatElement(strings.energySum, 0).to(obj.energydiv);
+    
+    obj.clancountdiv = new DivElement().to(obj.bottomstats);
+    obj.clancount = new StatElement(strings.clancount, 0).to(obj.clancountdiv);
+  }
   
   obj.renderoff = new CheckInput(strings.renderoff, false).to(obj.undercanvas);
   obj.rendertime = new StatElement(strings.rendertime, 0, strings.ms).to(obj.undercanvas);
   obj.handletime = new StatElement(strings.handletime, 0, strings.ms).to(obj.undercanvas);
   obj.performance = new StatElement(strings.performance, 0).to(obj.undercanvas);
   obj.seed = new StatElement(strings.seed, simulation.seed).to(obj.undercanvas);
+  
+  if (props.record) {
+    obj.recorddiv = new DivElement().to(obj.undercanvas);
+    
+    obj.recordmem = new StatElement(strings.recordMemory, "").to(obj.recorddiv);
+    
+    obj.recordbtns = new DivElement().to(obj.recorddiv);
+    
+    obj.recordsave = new ButtonElement(strings.recordSave, props.recordsave).to(obj.recordbtns);
+    obj.recordstop = new ButtonElement(strings.recordStop, props.recordstop).to(obj.recordbtns);
+  }
   
   obj.getZoom = function() {
     return this.zoom.value/10;
@@ -254,10 +274,12 @@ function setupInterface(main, simulation, props = {}) {
       obj.changed = true;
     });
     
-    obj.main.event("keydown", e => {
-      if (e.ctrlKey) return;
+    props.keys ??= true;
+    
+    if (props.keys) document.addEventListener("keydown", e => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
       
-      if (e.code == "Space" || e.code.includes("Arrow")) e.preventDefault();
+      let prevent = true;
       
       const zoom = obj.getZoom();
       
@@ -304,6 +326,9 @@ function setupInterface(main, simulation, props = {}) {
           obj.zoom.value *= 1.2;
           obj.changed = true;
           break;
+        
+        default:
+          prevent = false;
       }
       
       if (e.code.includes("Digit")) {
@@ -314,10 +339,14 @@ function setupInterface(main, simulation, props = {}) {
         
         obj.changed = true;
       }
+      
+      if (prevent) e.preventDefault();
     });
     
-    obj.main.event("keyup", e => {
-      if (e.ctrlKey) return;
+    if (props.keys) document.addEventListener("keyup", e => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      
+      let prevent = true;
       
       switch (e.code) {
         case "KeyJ":
@@ -340,7 +369,12 @@ function setupInterface(main, simulation, props = {}) {
         case "KeyO":
           obj.center.onclick();
           break;
+        
+        default:
+          prevent = false;
       }
+      
+      if (prevent) e.preventDefault();
     });
   }
   
@@ -423,6 +457,19 @@ function setupSettings(main, props) {
     new Array(props.prog).fill(0).map((x, i) => [i, i.toString(16).toUpperCase()])
   , 0).to(obj.main);
   
+  if (props.record) {
+    obj.recordheader = new Element({
+      elementType: "h3",
+      textContent: strings.recordSettings,
+      className: "header"
+    }).to(obj.main);
+    
+    obj.recordon = new CheckInput(strings.recordOnHeader, false).to(obj.main);
+    
+    obj.recordinterval = new NumberInput(strings.recordIntervalHeader, 1, 500, 5, true).to(obj.main);
+    obj.recordmax = new NumberInput(strings.recordMaxsizeHeader, 1, 1000, 50, true).to(obj.main);
+  }
+  
   obj.buttons = new DivElement().to(obj.main);
   obj.start = new ButtonElement(strings.setupStart, () => props.onstart()).to(obj.buttons);
   
@@ -471,22 +518,29 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
     if (interface.renderoff.value) {
       interface.canvasdiv.hide();
       interface.energydiv.hide();
+      interface.clancountdiv.hide();
     } else {
       interface.canvasdiv.show();
       interface.energydiv.show();
       
       const zoom = interface.getZoom();
       
+      if (lastRenderedFrame !== simulation.frame) updateSimulationEnergy(interface);
+      
       if (interface.changed || lastRenderedFrame !== simulation.frame || lastRenderedZoom !== zoom) {
-        render(renderer);
+        const { clancount } = render(renderer);
+        
+        if (interface.theme.value === "clan") {
+          interface.clancount.value = clancount;
+          
+          interface.clancountdiv.show();
+        } else interface.clancountdiv.hide();
         
         lastRenderedFrame = simulation.frame;
         lastRenderedZoom = zoom;
         
         interface.changed = false;
       }
-      
-      updateSimulationEnergy(interface);
     }
     
     updateSelectInfo(interface);
@@ -499,6 +553,8 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
       iteration(simulation);
       
       lastHandleFrame = frame;
+      
+      for (let i = 0; i < frameCallbacks.length; i++) frameCallbacks[i]();
     }
     
     const handletime = performance.now()-handlestart;
@@ -509,10 +565,8 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
     interface.rendertime.value = Math.ceil(rendertime);
     interface.handletime.value = Math.ceil(handletime);
     
-    if (interface.paused) interface.performance.value = "0cps";
-    else interface.performance.value = bigNumberString(simulation.population/(handletime/1000), 1, ["cps", "kps", "mps", "gps", "tps"]);
-    
-    for (let i = 0; i < frameCallbacks.length; i++) frameCallbacks[i]();
+    if (simulation.population === 0) interface.performance.value = "0cps";
+    else interface.performance.value = performanceString(simulation.population, handletime);
     
     frame++;
     

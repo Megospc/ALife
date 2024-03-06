@@ -1,4 +1,4 @@
-function render(renderer) {
+function render(renderer, props = {}) {
   const simulation = renderer.simulation;
   const interface = renderer.interface;
   const style = renderer.style;
@@ -25,20 +25,19 @@ function render(renderer) {
   gl.clear(gl.COLOR_BUFFER_BIT);
   
   let clans = {};
+  let clancount;
   
   if (theme === "clan") {
-    for (let i = 0; i < simulation.arr.length; i++) {
-      const a = simulation.arr[i];
-      
-      for (let j = 0; j < a.length; j++) if (simulation.type[a[j]]) clans[simulation.clan[a[j]]] = true;
-    }
+    for (let i = 0; i < simulation.clan.length; i++) if (simulation.type[i]) clans[simulation.clan[i]] = true;
     
     const keys = Object.keys(clans);
     
-    for (let i = 0; i < keys.length; i++) clans[keys[i]] = i/keys.length;
+    clancount = keys.length;
+    
+    for (let i = 0; i < keys.length; i++) clans[keys[i]] = i/clancount;
   }
   
-  if (cellsize > 10 || !gl) {
+  if (cellsize > 10 && !props.nopictures) {
     const maxOrganic = consts.maxOrganic;
     const maxCharge = consts.maxCharge;
     
@@ -317,7 +316,7 @@ function render(renderer) {
     gl.uniform1i(renderer.themeloc, ["nothing", "default", "energy", "contrast", "clan"].indexOf(theme));
     gl.uniform1i(renderer.backthemeloc, ["nothing", "default", "poisons", "organic", "charge"].indexOf(backtheme));
     
-    {
+    if (theme !== "nothing") {
       gl.bindTexture(gl.TEXTURE_2D, renderer.textureType);
       
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, simulation.type, 0);
@@ -328,7 +327,7 @@ function render(renderer) {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     }
     
-    {
+    if (backtheme !== "nothing" && backtheme !== "charge") {
       gl.bindTexture(gl.TEXTURE_2D, renderer.textureOrganic);
       
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(simulation.organic.buffer), 0);
@@ -339,10 +338,21 @@ function render(renderer) {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     }
     
-    {
+    if (backtheme !== "nothing" && backtheme !== "organic") {
       gl.bindTexture(gl.TEXTURE_2D, renderer.textureCharge);
       
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(simulation.charge.buffer), 0);
+      
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    }
+    
+    if (theme === "clan") {
+      gl.bindTexture(gl.TEXTURE_2D, renderer.textureClan);
+      
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, new Uint8Array(width*height).map((x, i) => clans[simulation.clan[i]]*255), 0);
       
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -370,25 +380,6 @@ function render(renderer) {
     gl.vertexAttribPointer(renderer.posloc, 2, gl.FLOAT, false, 0, 0);
     
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-    
-    if (theme === "clan") {
-      const sx = Math.max(Math.floor(-canvasw/2/cellsize+cameraX+width/2), 0);
-      const ex = Math.min(Math.ceil(canvasw/2/cellsize+cameraX+width/2), width);
-      const sy = Math.max(Math.floor(-canvash/2/cellsize+cameraY+height/2), 0);
-      const ey = Math.min(Math.ceil(canvash/2/cellsize+cameraY+height/2), height);
-      
-      for (let x = sx; x < ex; x++) for (let y = sy; y < ey; y++) {
-        const i = x+y*width;
-        
-        const type = simulation.type[i];
-        
-        if (type) {
-          ctx.fillStyle = rgbToHex(...hueToRgb(clans[simulation.clan[i]]).map(x => x*200));
-          
-          ctx.fillRect((x-cameraX-width/2)*cellsize+canvasw/2, (y-cameraY-height/2)*cellsize+canvash/2, cellsize, cellsize);
-        }
-      }
-    }
   }
   
   if (interface.showCenter) {
@@ -409,6 +400,10 @@ function render(renderer) {
     
     ctx.stroke();
   }
+  
+  return {
+    clancount
+  };
 }
 
 function createRenderer(interface, simulation, style) {
@@ -418,9 +413,11 @@ function createRenderer(interface, simulation, style) {
   
   const gl = interface.gl;
   
-  const textureType = gl.createTexture();
-  const textureOrganic = gl.createTexture();
-  const textureCharge = gl.createTexture();
+  if (!gl) {
+    alert(interface.strings.webglError);
+    
+    window.location.reload();
+  }
   
   const vertextext = `#version 300 es
 
@@ -454,9 +451,27 @@ out vec4 fragcolor;
 uniform sampler2D texture_types;
 uniform sampler2D texture_organic;
 uniform sampler2D texture_charge;
+uniform sampler2D texture_clan;
 
 uniform int theme;
 uniform int backtheme;
+
+vec4 hue(float hue) {
+  hue *= 6.;
+  
+  float v = hue;
+  
+  while (v > 1.) v -= 1.;
+  
+  int c = int(hue);
+  
+  if (c == 0) return vec4(1., v, 0, 1.);
+  if (c == 1) return vec4(1.-v, 1, 0, 1.);
+  if (c == 2) return vec4(0, 1., v, 1.);
+  if (c == 3) return vec4(0, 1.-v, 1., 1.);
+  if (c == 4) return vec4(v, 0, 1., 1.);
+  if (c == 5) return vec4(1., 0, 1.-v, 1.);
+}
 
 void main() {
   const int width = ${width};
@@ -543,6 +558,7 @@ void main() {
     if (type == 6) fragcolor = rootColor;
     if (type == 7) fragcolor = aerialColor;
   }
+  if (theme == 4) if (type > 0) fragcolor = hue(texture(texture_clan, p).x);
 }`;
   
   const vertex = compileShader(gl, gl.VERTEX_SHADER, vertextext);
@@ -566,20 +582,23 @@ void main() {
     textypeloc: gl.getUniformLocation(program, 'texture_types'),
     texorganicloc: gl.getUniformLocation(program, 'texture_organic'),
     texchargeloc: gl.getUniformLocation(program, 'texture_charge'),
+    texclanloc: gl.getUniformLocation(program, 'texture_clan'),
     zoomloc: gl.getUniformLocation(program, 'zoom'),
     camxloc: gl.getUniformLocation(program, 'camx'),
     camyloc: gl.getUniformLocation(program, 'camy'),
     themeloc: gl.getUniformLocation(program, 'theme'),
     backthemeloc: gl.getUniformLocation(program, 'backtheme'),
     
-    textureType,
-    textureOrganic,
-    textureCharge
+    textureType: gl.createTexture(),
+    textureOrganic: gl.createTexture(),
+    textureCharge: gl.createTexture(),
+    textureClan: gl.createTexture()
   };
   
   gl.uniform1i(obj.texttypeloc, 0);
   gl.uniform1i(obj.texorganicloc, 1);
   gl.uniform1i(obj.texchargeloc, 2);
+  gl.uniform1i(obj.texclanloc, 3);
   
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, obj.textureType);
@@ -587,6 +606,8 @@ void main() {
   gl.bindTexture(gl.TEXTURE_2D, obj.textureOrganic);
   gl.activeTexture(gl.TEXTURE2);
   gl.bindTexture(gl.TEXTURE_2D, obj.textureCharge);
+  gl.activeTexture(gl.TEXTURE3);
+  gl.bindTexture(gl.TEXTURE_2D, obj.textureClan);
   
   return obj;
 }
