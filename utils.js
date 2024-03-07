@@ -65,6 +65,27 @@ class Element {
 const angleX = [ 0, 1, 0, -1 ];
 const angleY = [ -1, 0, 1, 0 ];
 
+function callNearby(f) {
+  f(-1, -1);
+  f(0, -1);
+  f(1, -1);
+  f(-1, 0);
+  f(0, 0);
+  f(1, 0);
+  f(-1, 1);
+  f(0, 1);
+  f(1, 1);
+}
+
+function callAngles(f, zero) {
+  f(0, -1);
+  f(1, 0);
+  f(0, 1);
+  f(-1, 0);
+  
+  if (zero) f(0, 0);
+}
+
 function correctAngle(angle) {
   return (angle+4) & 0b11; // Не %, для оптимизации
 }
