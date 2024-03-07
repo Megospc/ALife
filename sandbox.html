@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ALife - SandBox</title>
+  <title>ALife</title>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -189,7 +189,7 @@
     
     renderer = createRenderer(interface, simulation, style);
   
-    interval = startWindow([], [], interface, simulation, renderer);
+    interval = startWindow([], [], interface, simulation, renderer, 60);
     
     main.show();
   }
@@ -199,46 +199,4 @@
     
     sessionStorage.setItem("alife-save", "");
   }
-  /*
-  const simulation = createSimulation(300, 300, {}, generateRandomSeed());
-  
-  const interface = setupInterface("main", simulation, {
-    strings,
-    targetsize: 1200
-  });
-  
-  const renderer = createRenderer(interface, simulation, style);
-  
-  const methods = simulation.methods;
-  
-  for (let i = 0, clan = 0; i < simulation.type.length; i++) {
-    if (!methods.chance(1/9)) continue;
-    
-    methods.putNewCellIndex(2, i);
-    
-    simulation.energy[i] = 20000;
-    simulation.angle[i] = methods.randomInt(4);
-    
-    simulation.current[i] = 0;
-    simulation.curprog[i] = 0;
-    simulation.clan[i] = clan++;
-    
-    methods.copyGenome(i);
-  }
-  
-  const charge = 10000;
-  const organic = 50;
-  
-  for (let i = 0; i < simulation.organic.length; i++) simulation.organic[i] = organic;
-  for (let i = 0; i < simulation.charge.length; i++) simulation.charge[i] = charge;
-  
-  simulation.sun = 500;
-  
-  setupLanguageChanger(new DivElement().to(main), strings, language);
-  
-  startWindow([], [], interface, simulation, renderer);
-  
-  function start() {
-    
-  }*/
 </script>

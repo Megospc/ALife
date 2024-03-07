@@ -61,6 +61,7 @@ const languagesStrings = {
     iteration: "Итерация",
     population: "Живых клеток",
     fps: "FPS",
+    fpsChange: "Введите новый целевой FPS (2-250)",
     clancount: "Живых кланов",
     rendermodeHeader: "Режим отрисовки",
     rendermodeValues: [
@@ -209,6 +210,7 @@ const languagesStrings = {
     iteration: "Iteration",
     population: "Cells alive",
     fps: "FPS",
+    fpsChange: "Please enter a new goal FPS (2-250)",
     clancount: "Clans alive",
     rendermodeHeader: "Rendering mode",
     rendermodeValues: [
@@ -268,13 +270,13 @@ const languagesStrings = {
     infoUniqHeader: "ID",
     
     recordSettings: "Recording settings",
-    recordOnHeader: "Recoreing",
+    recordOnHeader: "Recording",
     recordIntervalHeader: "Recording frame interval",
     recordMaxsizeHeader: "Maximum size (MiB)",
     recordHeader: "Recording reader",
     recordMemory: "Recording size",
     recordSave: "save",
-    recordReset: "reset",
+    recordReset: "restart",
     recordStop: "stop",
     recordStopAsk: "Do you really want to stop the record? You can't undo this.",
     recordMaxsizeReached: "The record has reached maximum size",
@@ -285,7 +287,7 @@ const languagesStrings = {
     
     toMainpage: "Home page",
     toSandbox: "Sandbox",
-    toReader: "Record reader",
+    toRecord: "Record reader",
     
     language: "Change language",
     

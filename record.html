@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ALife - Record</title>
+  <title>ALife</title>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -132,117 +132,9 @@
         
         lastTime = time;
       }
-    }, 15);
+    }, 25);
     
     select.hide();
     main.show();
   }
-  
-  function start() {
-    if (interval) {
-      clearInterval(interval);
-      
-      main.attr("innerHTML", "");
-    }
-    
-    const size = +settings.size.value;
-    
-    const reqmem = (size**2)*512;
-    
-    const gib = 2**30;
-    
-    const devmem = (navigator.deviceMemory ?? 0.5)*gib/2;
-    
-    if (devmem <= reqmem || reqmem >= gib) if (!confirm(strings.memoryAsk(reqmem))) return;
-    
-    simulation = createSimulation(size, size, {
-      ...obj.consts,
-      mutationChance: 0
-    }, settings.seed.value);
-    
-    const methods = simulation.methods;
-    
-    const i = methods.posIndex(Math.floor(size/2), Math.floor(size/2));
-    
-    methods.putNewCellIndex(2, i);
-    
-    simulation.energy[i] = 20000;
-    simulation.angle[i] = 0;
-    
-    simulation.current[i] = 0;
-    simulation.curprog[i] = +settings.prog.value;
-    simulation.clan[i] = 0;
-    
-    const genomeLength = simulation.consts.genomeWidth*simulation.consts.genomeHeight;
-    
-    for (let j = 0; j < genomeLength; j++) simulation.genome[i*genomeLength+j] = obj.genome[j];
-  
-    const charge = settings.resources.value;
-    const organic = charge/simulation.consts.organicCost;
-    
-    for (let i = 0; i < simulation.organic.length; i++) simulation.organic[i] = organic;
-    for (let i = 0; i < simulation.charge.length; i++) simulation.charge[i] = charge;
-    
-    simulation.sun = settings.sun.value;
-    
-    
-    
-    
-    
-    interface.pause.onclick();
-    
-    renderer = createRenderer(interface, simulation, style);
-  
-    interval = startWindow([], [], interface, simulation, renderer);
-    
-    main.show();
-  }
-  
-  if (sessionStorage.getItem("alife-save")) {
-    parseJSON(sessionStorage.getItem("alife-save"));
-    
-    sessionStorage.setItem("alife-save", "");
-  }
-  /*
-  const simulation = createSimulation(300, 300, {}, generateRandomSeed());
-  
-  const interface = setupInterface("main", simulation, {
-    strings,
-    targetsize: 1200
-  });
-  
-  const renderer = createRenderer(interface, simulation, style);
-  
-  const methods = simulation.methods;
-  
-  for (let i = 0, clan = 0; i < simulation.type.length; i++) {
-    if (!methods.chance(1/9)) continue;
-    
-    methods.putNewCellIndex(2, i);
-    
-    simulation.energy[i] = 20000;
-    simulation.angle[i] = methods.randomInt(4);
-    
-    simulation.current[i] = 0;
-    simulation.curprog[i] = 0;
-    simulation.clan[i] = clan++;
-    
-    methods.copyGenome(i);
-  }
-  
-  const charge = 10000;
-  const organic = 50;
-  
-  for (let i = 0; i < simulation.organic.length; i++) simulation.organic[i] = organic;
-  for (let i = 0; i < simulation.charge.length; i++) simulation.charge[i] = charge;
-  
-  simulation.sun = 500;
-  
-  setupLanguageChanger(new DivElement().to(main), strings, language);
-  
-  startWindow([], [], interface, simulation, renderer);
-  
-  function start() {
-    
-  }*/
 </script>
