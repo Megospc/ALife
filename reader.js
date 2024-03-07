@@ -23,6 +23,8 @@ function createReader(data) {
     methods,
     data,
     
+    clanbits: 0,
+    
     indexBitsize: Math.ceil(Math.log2(width*height)),
     
     reset() {
@@ -56,6 +58,15 @@ function readFrame(reader) {
   
   const clancount = methods.read32();
   
+  const clanbits = Math.ceil(Math.log2(clancount));
+  
+  if (version >= 3 && clanbits !== reader.clanbits) {
+    reader.clanbits = clanbits;
+    reader.clans = {};
+    
+    for (let i = 0; i < clancount; i++) reader.clans[i] = methods.read32();
+  }
+  
   const changes = methods.read32();
   
   const buffer = methods.createBitbuf();
@@ -71,7 +82,7 @@ function readFrame(reader) {
       simulation.organic[index] = buffer.readBit();
       simulation.charge[index] = buffer.readBit();
       
-      simulation.clan[index] = buffer.read(clanbits);
+      if (simulation.type[index]) simulation.clan[index] = reader.clans[buffer.read(clanbits)];
     }
   } else if (version >= 2) for (let i = 0; i < changes; i++) {
     const index = buffer.read(indexBitsize);

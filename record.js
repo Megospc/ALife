@@ -1,4 +1,4 @@
-function createRecorder(simulation, version = 2) {
+function createRecorder(simulation, version = 3) {
   const data = [];
   
   const width = simulation.width;
@@ -19,6 +19,8 @@ function createRecorder(simulation, version = 2) {
     lastType: new Uint8Array(simulation.type.length),
     lastResources: new Uint8Array(simulation.organic.length),
     lastClan: new Uint32Array(simulation.clan.length),
+    
+    clanbits: 0,
     
     memory: 0,
     
@@ -53,18 +55,32 @@ function recordFrame(recorder) {
   methods.write32(simulation.frame);
   methods.write32(simulation.population);
   
-  let clans = {};
+  const clans = {};
+  const clantable = [];
+  
   let clancount = 0;
   
   if (version >= 3) for (let i = 0; i < simulation.clan.length; i++) {
     const clan = simulation.clan[i];
     
-    if (!clans[clan]) clans[clan] = clancount++;
+    if (!clans[clan]) {
+      clans[clan] = clancount++;
+      
+      clantable.push(clan);
+    }
   }
   
   methods.write32(clancount);
   
   const clanbits = Math.ceil(Math.log2(clancount));
+  
+  if (clanbits !== recorder.clanbits) {
+    recorder.clanbits = clanbits;
+    recorder.clantable = clantable;
+    recorder.clans = clans;
+    
+    for (let i = 0; i < clancount; i++) methods.write32(clantable[i]);
+  }
   
   const buffer = methods.createBitbuf();
   
@@ -75,11 +91,12 @@ function recordFrame(recorder) {
     const curres = simulation.organic[i] >= maxOrganic ? 1:(simulation.charge[i] >= maxCharge ? 2:0);
     const curclan = simulation.clan[i];
     
-    if (recorder.lastType[i] !== curtype || recorder.lastResources[i] !== curres || recorder.lastClan[i] !== curclan) {
+    if (recorder.lastType[i] !== curtype || recorder.lastResources[i] !== curres || (recorder.lastClan[i] !== curclan && curtype > 0)) {
       buffer.write(i, indexBitsize);
       buffer.write(curtype, 3);
       buffer.write(curres, 2);
-      buffer.write(clans[curclan], clanbits);
+      
+      if (curtype > 0) buffer.write(recorder.clans[curclan], clanbits);
       
       recorder.lastType[i] = curtype;
       recorder.lastResources[i] = curres;

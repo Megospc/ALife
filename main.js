@@ -20,6 +20,8 @@ function getSimulationMethods(simulation) {
   const maxOrganic = consts.maxOrganic;
   const maxCharge = consts.maxCharge;
   
+  const resourcesDiffusion = consts.resourcesDiffusion;
+  
   const mutationChance = consts.mutationChance;
   
   const deathOnPotionDestroysIt = consts.deathOnPotionDestroysIt;
@@ -123,36 +125,50 @@ function getSimulationMethods(simulation) {
       return Math.floor(i/simulation.width);
     },
     
-    nearIndexByAngle(i, angle) {
-      return this.posIndex(this.indexX(i)+angleX[angle], this.indexY(i)+angleY[angle]);
+    nearIndexByAngle(i, angle, distance = 1) {
+      return this.posIndex(this.indexX(i)+angleX[angle]*distance, this.indexY(i)+angleY[angle]*distance);
     },
     
     getSun(i) {
       return Math.floor(simulation.sun*simulation.organic[i]/maxOrganic);
     },
     
-    addResource(data, i, add) {
-      const cx = this.indexX(i);
-      const cy = this.indexY(i);
-      
-      const f = (x, y) => {
-        const j = this.posIndex(cx+x, cy+y);
+    addResource: (resourcesDiffusion ?
+      function(data, i, add) {
+        const cx = this.indexX(i);
+        const cy = this.indexY(i);
         
-        if (data[j]+add >= 0) data[j] += add;
+        let avg = add*9;
         
-        if (simulation.type[j] > 0) this.deadByPotionTest(j);
-      };
-      
-      f(-1, -1);
-      f(0, -1);
-      f(1, -1);
-      f(-1, 0);
-      f(0, 0);
-      f(1, 0);
-      f(-1, 1);
-      f(0, 1);
-      f(1, 1);
-    },
+        callNearby((x, y) => {
+          const j = this.posIndex(cx+x, cy+y);
+          
+          avg += data[j];
+        });
+        
+        avg = Math.max(Math.floor(avg/9), 0);
+        
+        callNearby((x, y) => {
+          const j = this.posIndex(cx+x, cy+y);
+          
+          data[j] = avg;
+          
+          if (simulation.type[j] > 0) this.deadByPotionTest(j);
+        });
+      }:
+      function(data, i, add) {
+        const cx = this.indexX(i);
+        const cy = this.indexY(i);
+        
+        callNearby((x, y) => {
+          const j = this.posIndex(cx+x, cy+y);
+          
+          if (data[j]+add >= 0) data[j] += add;
+          
+          if (simulation.type[j] > 0) this.deadByPotionTest(j);
+        });
+      }
+    ),
     
     moveCell(i, k) {
       simulation.arr[simulation.type[i]][simulation.placeid[i]] = k;
@@ -219,6 +235,7 @@ function iteration(simulation) {
   const addOrganic = consts.addOrganic;
   const organicCost = consts.organicCost;
   const organicMoving = consts.organicMoving;
+  const organicMovingSquare = consts.organicMovingSquare;
   
   const maxCharge = consts.maxCharge;
   const chargeAvg = consts.chargeAvg;
@@ -236,6 +253,7 @@ function iteration(simulation) {
   const sproutDefaultProg = consts.sproutDefaultProg;
   
   const sproutCommandsV2 = consts.sproutCommandsV2;
+  const lookDistance = consts.lookDistance;
   
   const seedCost = consts.seedCost;
   const seedConsumption = consts.seedConsumption;
@@ -315,16 +333,11 @@ function iteration(simulation) {
       const sx = methods.indexX(i);
       const sy = methods.indexY(i);
       
-      function f(x, y) {
+      callAngles((x, y) => {
         const i = methods.posIndex(sx+x, sy+y);
         
         if (ptype[i] === 5) nears++;
-      }
-      
-      f(0, -1);
-      f(1, 0);
-      f(0, 1);
-      f(-1, 0);
+      });
     }
     
     if (!leafMaxNears || nears < leafMaxNears) penergy[i] += methods.getSun(i);
@@ -697,7 +710,9 @@ function iteration(simulation) {
       }
       if (command === 15) { // Посмотреть
         const angle = correctAngle(pangle[i]+getCommand(1));
-        const k = methods.nearIndexByAngle(i, angle);
+        const k = lookDistance > 1 ?
+          methods.nearIndexByAngle(i, angle, getCommand(8)):
+          methods.nearIndexByAngle(i, angle);
         
         if (ptype[k] > 0) {
           if (ptype[k] === 1) change = getCommand(3);
@@ -730,32 +745,40 @@ function iteration(simulation) {
         }
         
         if (command === 19) { // Передвижение органики
-          const anglep = getCommand(1)%5;
+          let l;
           
-          const targang = correctAngle(pangle[i]+anglep);
-          const tari = anglep === 4 ? i:methods.nearIndexByAngle(i, targang);
+          if (organicMovingSquare) {
+            const anglep = getCommand(1)%9;
+            
+            const tx = methods.indexX(i)+anglep%3-1;
+            const ty = methods.indexY(i)+Math.floor(anglep/3)-1;
+            
+            l = methods.posIndex(tx, ty);
+          } else {
+            const anglep = getCommand(1)%5;
+            
+            l = anglep === 4 ? i:methods.nearIndexByAngle(i, anglep);
+          }
           
-          function move(angle) {
-            const ang = correctAngle(pangle[i]+angle);
+          function move(x, y) {
+            const nx = methods.indexX(i)+x;
+            const ny = methods.indexY(i)+y;
             
-            const k = angle === 4 ? i:methods.nearIndexByAngle(i, ang);
+            const k = methods.posIndex(nx, ny);
             
-            if (k !== tari) {
+            if (k !== l) {
               if (sorganic[k] >= organicMoving) {
-                sorganic[tari] += organicMoving;
+                sorganic[l] += organicMoving;
                 sorganic[k] -= organicMoving;
               } else {
-                sorganic[tari] += sorganic[k];
+                sorganic[l] += sorganic[k];
                 sorganic[k] = 0;
               }
             }
           }
           
-          move(0);
-          move(1);
-          move(2);
-          move(3);
-          move(4);
+          if (organicMovingSquare) callNearby(move);
+          else callAngles(move, true);
           
           change = getCommand(2);
           
@@ -1023,7 +1046,7 @@ function iteration(simulation) {
     methods.deleteCell(i);
     
     methods.addResource(simulation.organic, i, addOrganic*organic);
-    if (penergy[i] > 0) methods.addResource(simulation.charge, i, Math.floor(penergy[i]/9*charge));
+    methods.addResource(simulation.charge, i, Math.floor(penergy[i]/9*charge));
     
     ptype[i] = 0;
   }
@@ -1045,6 +1068,9 @@ function getSimulationConsts(consts) {
     addOrganic: consts.addOrganic ?? 1,
     organicCost: consts.organicCost ?? 200,
     organicMoving: consts.organicMoving ?? 5,
+    organicMovingSquare: consts.organicMovingSquare ?? false,
+    
+    resourcesDiffusion: consts.resourcesDiffusion ?? false,
     
     maxCharge: consts.maxCharge ?? 50000,
     chargeAvg: consts.chargeAvg ?? 10000,
@@ -1079,6 +1105,7 @@ function getSimulationConsts(consts) {
     sproutDefaultProg: consts.sproutDefaultProg ?? 0,
     
     sproutCommandsV2: consts.sproutCommandsV2 ?? false,
+    lookDistance: consts.lookDistance ?? 1,
     
     seedCost: consts.seedCost ?? 3000,
     seedConsumption: consts.seedConsumption ?? 5,

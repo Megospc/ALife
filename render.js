@@ -28,7 +28,7 @@ function render(renderer, props = {}) {
   let clancount;
   
   if (theme === "clan") {
-    for (let i = 0; i < simulation.clan.length; i++) if (simulation.type[i]) clans[simulation.clan[i]] = true;
+    for (let i = 0; i < simulation.clan.length; i++) if (simulation.type[i] > 0) clans[simulation.clan[i]] = true;
     
     const keys = Object.keys(clans);
     
@@ -281,7 +281,7 @@ function render(renderer, props = {}) {
         const type = simulation.type[i];
         
         if (type) {
-          ctx.fillStyle = rgbToHex(...hueToRgb(clans[simulation.clan[i]]).map(x => x*200));
+          ctx.fillStyle = rgbToHex(...hueToRgb(clans[simulation.clan[i]]).map(x => x*240));
           
           ctx.fillRect(scaleX(x-0.5)+gridw/2, scaleY(y-0.5)+gridw/2, cellsize-gridw, cellsize-gridw);
         }
@@ -349,10 +349,21 @@ function render(renderer, props = {}) {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     }
     
+    if (theme === "energy") {
+      gl.bindTexture(gl.TEXTURE_2D, renderer.textureEnergy);
+      
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(simulation.energy.buffer), 0);
+      
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    }
+    
     if (theme === "clan") {
       gl.bindTexture(gl.TEXTURE_2D, renderer.textureClan);
       
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, new Uint8Array(width*height).map((x, i) => clans[simulation.clan[i]]*255), 0);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, new Uint8Array(width*height).map((x, i) => Math.floor(clans[simulation.clan[i]]*255)), 0);
       
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -452,6 +463,7 @@ uniform sampler2D texture_types;
 uniform sampler2D texture_organic;
 uniform sampler2D texture_charge;
 uniform sampler2D texture_clan;
+uniform sampler2D texture_energy;
 
 uniform int theme;
 uniform int backtheme;
@@ -473,12 +485,24 @@ vec4 hue(float hue) {
   if (c == 5) return vec4(1., 0, 1.-v, 1.);
 }
 
+vec4 woodcolor(float units) {
+  const vec4 wood1 = ${hexToVec4(style.wood1)};
+  const vec4 wood2 = ${hexToVec4(style.wood2)};
+  const vec4 wood3 = ${hexToVec4(style.wood3)};
+  const vec4 wood12 = wood2-wood1;
+  const vec4 wood23 = wood3-wood2;
+  
+  if (units < 100.) return wood1+wood12*units/100.;
+  else return wood2+wood23*(units-100.)/400.;
+}
+
 void main() {
   const int width = ${width};
   const int height = ${height};
   
   const int maxOrganic = ${consts.maxOrganic};
   const int maxCharge = ${consts.maxCharge};
+  const int energyUnit = ${consts.energyUnit};
   
   const vec4 bgColor = ${hexToVec4(style.background)};
   const vec4 woodColor = ${hexToVec4(style.woodColor)};
@@ -496,6 +520,8 @@ void main() {
   
   const vec4 potionOrganic = ${hexToVec4(style.potionOrganic)};
   const vec4 potionCharge = ${hexToVec4(style.potionCharge)};
+  const vec4 potionOrganicEnergy = ${hexToVec4(style.potionOrganicEnergy)};
+  const vec4 potionChargeEnergy = ${hexToVec4(style.potionChargeEnergy)};
   
   float fx = fragpos.x;
   float fy = fragpos.y;
@@ -511,36 +537,42 @@ void main() {
   
   vec2 p = vec2((float(x)+0.5)/float(width), (float(y)+0.5)/float(height));
   
-  int type = int(texture(texture_types, p).x*255.);
+  int type = int(texture(texture_types, p).x*256.);
   
-  vec4 organicv = texture(texture_organic, p)*255.;
-  vec4 chargev = texture(texture_charge, p)*255.;
+  vec4 organicv = texture(texture_organic, p)*256.;
+  vec4 chargev = texture(texture_charge, p)*256.;
+  vec4 energyv = texture(texture_energy, p)*256.;
   
   int organic = (int(organicv[3]) << 24) + (int(organicv[2]) << 16) + (int(organicv[1]) << 8) + int(organicv[0]);
   int charge = (int(chargev[3]) << 24) + (int(chargev[2]) << 16) + (int(chargev[1]) << 8) + int(chargev[0]);
+  int energy = (int(energyv[3]) << 24) + (int(energyv[2]) << 16) + (int(energyv[1]) << 8) + int(energyv[0]);
   
   if (backtheme == 0) fragcolor = bgColor;
   if (backtheme == 1 || backtheme == 2) {
-    if (organic >= maxOrganic) fragcolor = potionOrganic;
+    if (organic >= maxOrganic) fragcolor = theme == 2 ? potionOrganicEnergy:potionOrganic;
     else {
-      if (charge >= maxCharge) fragcolor = potionCharge;
+      if (charge >= maxCharge) fragcolor = theme == 2 ? potionChargeEnergy:potionCharge;
       else fragcolor = bgColor;
     }
   }
   if (backtheme == 3) {
-    float v = float(organic)/float(maxOrganic);
-    
-    if (v >= 1.) fragcolor = vec4(1, 0, 0, 1);
-    else fragcolor = vec4(1.-v, 1.-v, 1.-v, 1);
+    if (organic >= maxOrganic) fragcolor = vec4(1, 0, 0, 1);
+    else {
+      float v = float(organic)/float(maxOrganic);
+      
+      fragcolor = vec4(1.-v, 1.-v, 1.-v, 1);
+    }
   }
   if (backtheme == 4) {
-    float v = float(charge)/float(maxCharge);
-    
-    if (v >= 1.) fragcolor = vec4(0, 0, 1, 1);
-    else fragcolor = vec4(1.-v, 1.-v, 1.-v, 1);
+    if (charge >= maxCharge) fragcolor = vec4(0, 0, 1, 1);
+    else {
+      float v = float(charge)/float(maxCharge);
+      
+      fragcolor = vec4(1.-v, 1.-v, 1.-v, 1);
+    }
   }
   
-  if (theme == 1 || theme == 2) {
+  if (theme == 1) {
     if (type == 1) fragcolor = woodColor;
     if (type == 2) fragcolor = sproutColor;
     if (type == 3) fragcolor = seedColor;
@@ -549,6 +581,7 @@ void main() {
     if (type == 6) fragcolor = rootColor;
     if (type == 7) fragcolor = aerialColor;
   }
+  if (theme == 2) if (type > 0) fragcolor = woodcolor(float(energy)/float(energyUnit));
   if (theme == 3) {
     if (type == 1) fragcolor = woodContrast;
     if (type == 2) fragcolor = sproutContrast;
@@ -583,6 +616,7 @@ void main() {
     texorganicloc: gl.getUniformLocation(program, 'texture_organic'),
     texchargeloc: gl.getUniformLocation(program, 'texture_charge'),
     texclanloc: gl.getUniformLocation(program, 'texture_clan'),
+    texenergyloc: gl.getUniformLocation(program, 'texture_energy'),
     zoomloc: gl.getUniformLocation(program, 'zoom'),
     camxloc: gl.getUniformLocation(program, 'camx'),
     camyloc: gl.getUniformLocation(program, 'camy'),
@@ -592,13 +626,15 @@ void main() {
     textureType: gl.createTexture(),
     textureOrganic: gl.createTexture(),
     textureCharge: gl.createTexture(),
-    textureClan: gl.createTexture()
+    textureClan: gl.createTexture(),
+    textureEnergy: gl.createTexture()
   };
   
   gl.uniform1i(obj.texttypeloc, 0);
   gl.uniform1i(obj.texorganicloc, 1);
   gl.uniform1i(obj.texchargeloc, 2);
   gl.uniform1i(obj.texclanloc, 3);
+  gl.uniform1i(obj.texenergyloc, 4);
   
   gl.activeTexture(gl.TEXTURE0);
   gl.bindTexture(gl.TEXTURE_2D, obj.textureType);
@@ -608,6 +644,8 @@ void main() {
   gl.bindTexture(gl.TEXTURE_2D, obj.textureCharge);
   gl.activeTexture(gl.TEXTURE3);
   gl.bindTexture(gl.TEXTURE_2D, obj.textureClan);
+  gl.activeTexture(gl.TEXTURE4);
+  gl.bindTexture(gl.TEXTURE_2D, obj.textureEnergy);
   
   return obj;
 }

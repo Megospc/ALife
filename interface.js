@@ -68,7 +68,7 @@ function setupInterface(main, simulation, props = {}) {
   obj.topstats = new DivElement().to(obj.main);
   obj.frame = new StatElement(strings.iteration, 0).to(obj.topstats);
   obj.population = new StatElement(strings.population, 0).to(obj.topstats);
-  obj.fps = new StatElement(strings.fps, 0).to(obj.topstats);
+  obj.fps = new StatElement(strings.fps, 0).attr("onclick", props.changeFPS ?? (() => {})).to(obj.topstats);
   
   obj.themes = new DivElement().to(obj.main);
   obj.theme = new SelectElement(strings.rendermodeHeader, [
@@ -344,8 +344,6 @@ function setupInterface(main, simulation, props = {}) {
     });
     
     if (props.keys) document.addEventListener("keyup", e => {
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
-      
       let prevent = true;
       
       switch (e.code) {
@@ -503,7 +501,7 @@ function setupLanguageChanger(main, strings, language) {
   }).to(main);
 }
 
-function startWindow(startCallbacks, frameCallbacks, interface, simulation, renderer) {
+function startWindow(startCallbacks, frameCallbacks, interface, simulation, renderer, fps = 40) {
   for (let i = 0; i < startCallbacks.length; i++) startCallbacks[i]();
   
   let lastTime = performance.now();
@@ -577,7 +575,7 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
       
       lastTime = time;
     }
-  }, 15);
+  }, 1000/fps);
 }
 
 function updateSimulationEnergy(interface) {
