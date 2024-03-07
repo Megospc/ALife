@@ -30,6 +30,8 @@ const style = {
   potionCharge: "#b0b0f0",
   potionOrganicZoom: "#d45b49",
   potionChargeZoom: "#2e3b9b",
+  potionOrganicEnergy: "#c04040",
+  potionChargeEnergy: "#4040c0",
   edge: "#808080",
   center: "#a0a0a0",
   grid: "#000000",
