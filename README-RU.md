@@ -12,16 +12,16 @@
 [**ПОЛНАЯ ВЕРСИЯ**](https://megospc.github.io/ALife/index.html?lang=ru)
 
 ## Скриншоты
-<img width="300" src="images/snap1.png">
-<img width="300" src="images/snap2.png">
-<img width="300" src="images/snap3.png">
-<img width="300" src="images/snap4.png">
-<img width="300" src="images/snap5.png">
-<img width="300" src="images/snap6.png">
+<img width="450" src="images/snap1.png">
+<img width="450" src="images/snap2.png">
+<img width="450" src="images/snap3.png">
+<img width="450" src="images/snap4.png">
+<img width="450" src="images/snap5.png">
+<img width="450" src="images/snap6.png">
 
 <details>
   <summary><b>Открой меня!</b></summary>
-  <img width="900" src="images/snap-big.png">
+  <img width="600" src="images/snap-big.png">
 </details>
 
 ## Особенности
