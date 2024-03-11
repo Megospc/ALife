@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ALife</title>
   <meta charset="UTF-8">
+  <title>ALife</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="headdiv">
     <h1 id="header" class="header"></h1>
-    <a id="mainpage"></a>
+    <a id="mainpage" class="pagelink"></a>
   </div>
   <div id="select">
     <input type="file" id="fileinput" style="display: none" onchange="readFile(this.files[0])">
@@ -79,15 +79,29 @@
   
   new ButtonElement(strings.setupDownload, () => downloadText(getJSON(), (obj.name ? obj.name:"unnamed")+".alife-species")).to(new DivElement().to(edit));
   
+  const progressdiv = new DivElement().hide().to(document.body);
+  
+  new Element({
+    elementType: "p",
+    className: "label",
+    textContent: strings.setupCreating
+  }).to(progressdiv);
+  
+  const progress = new ProgressBar().to(progressdiv);
+  
   setupLanguageChanger(new DivElement().to(select), strings, language);
   
   var obj, settings, simulation, interface, interval;
   
   function getJSON() {
     obj.settings = {
-      sun: settings.sun.value,
-      resources: settings.resources.value
+      sun: +settings.sun.value,
+      resources: +settings.resources.value,
+      prog: +settings.prog.value,
+      density: +settings.density.value
     };
+    
+    obj.changedDate = Date.now();
     
     return JSON.stringify(obj);
   }
@@ -106,7 +120,6 @@
       
       header: "h2",
       
-      density: false,
       prog: getSimulationConsts(obj.consts).genomeHeight,
       
       onstart: start
@@ -119,6 +132,7 @@
     
     settings.sun.value = obj.settings.sun ?? 500;
     settings.resources.value = obj.settings.resources ?? 10000;
+    settings.density.value = obj.settings.density ?? 50;
     settings.prog.value = obj.settings.prog ?? 0;
     
     select.hide();
@@ -143,55 +157,87 @@
     
     if (devmem <= reqmem || reqmem >= gib) if (!confirm(strings.memoryAsk(reqmem))) return;
     
-    simulation = createSimulation(size, size, {
-      ...obj.consts,
-      mutationChance: 0
-    }, settings.seed.value);
+    try {
+      simulation = createSimulation(size, size, {
+        ...obj.consts,
+        mutationChance: 0
+      }, +settings.seed.value);
+    } catch (e) {
+      alert(strings.noMemory);
+      
+      return;
+    }
     
     const methods = simulation.methods;
     
-    const i = methods.posIndex(Math.floor(size/2), Math.floor(size/2));
-    
-    methods.putNewCellIndex(2, i);
-    
-    simulation.energy[i] = 20000;
-    simulation.angle[i] = 0;
-    
-    simulation.current[i] = 0;
-    simulation.curprog[i] = +settings.prog.value;
-    simulation.clan[i] = 0;
-    
     const genomeLength = simulation.consts.genomeWidth*simulation.consts.genomeHeight;
     
-    for (let j = 0; j < genomeLength; j++) simulation.genome[i*genomeLength+j] = obj.genome[j];
-  
-    const charge = settings.resources.value;
+    const charge = +settings.resources.value;
     const organic = charge/simulation.consts.organicCost;
     
-    for (let i = 0; i < simulation.organic.length; i++) simulation.organic[i] = organic;
-    for (let i = 0; i < simulation.charge.length; i++) simulation.charge[i] = charge;
+    let clan = 0;
     
-    simulation.sun = settings.sun.value;
+    setup.hide();
+    progressdiv.show();
     
-    const targetsize = 
-      size == 800 ? 1600:
-      size == 1800 ? 1800:1200;
-    
-    interface = setupInterface("main", simulation, {
-      strings,
-      language,
-      targetsize,
+    function createWorld(i, callback) {
+      const start = performance.now();
       
-      keys: false
+      while (i & 1023 || performance.now()-start < 20) {
+        simulation.organic[i] = organic;
+        simulation.charge[i] = charge;
+        
+        if (methods.chance(0.01/(+settings.density.value))) {
+          methods.putNewCellIndex(2, i);
+          
+          simulation.energy[i] = 20000;
+          simulation.angle[i] = methods.randomInt(4);
+          
+          simulation.current[i] = 0;
+          simulation.curprog[i] = +settings.prog.value;
+          simulation.clan[i] = clan++;
+          
+          for (let j = 0; j < genomeLength; j++) simulation.genome[i*genomeLength+j] = obj.genome[j];
+        }
+        
+        if (++i === simulation.type.length) {
+          callback();
+          
+          return;
+        }
+      }
+      
+      progress.draw(i/simulation.type.length);
+      
+      setTimeout(() => createWorld(i, callback));
+    }
+    
+    createWorld(0, function() {
+      simulation.sun = +settings.sun.value;
+      
+      const targetsize = 
+        size == 800 ? 1600:
+        size == 1800 ? 1800:1200;
+      
+      interface = setupInterface("main", simulation, {
+        strings,
+        language,
+        targetsize,
+        
+        keys: false
+      });
+      
+      interface.pause.onclick();
+      
+      renderer = createRenderer(interface, simulation, style);
+    
+      interval = startWindow([], [], interface, simulation, renderer, 60);
+      
+      progressdiv.hide();
+      
+      setup.show();
+      main.show();
     });
-    
-    interface.pause.onclick();
-    
-    renderer = createRenderer(interface, simulation, style);
-  
-    interval = startWindow([], [], interface, simulation, renderer, 60);
-    
-    main.show();
   }
   
   if (sessionStorage.getItem("alife-save")) {

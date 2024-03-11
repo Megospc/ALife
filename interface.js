@@ -126,11 +126,13 @@ function setupInterface(main, simulation, props = {}) {
   if (props.bottomstats ?? true) {
     obj.bottomstats = new DivElement().to(obj.undercanvas);
     
-    obj.energydiv = new DivElement().to(obj.bottomstats);
-    obj.energyorganic = new StatElement(strings.energyOrganic, 0).to(obj.energydiv);
-    obj.energycharge = new StatElement(strings.energyCharge, 0).to(obj.energydiv);
-    obj.energyenergy = new StatElement(strings.energyEnergy, 0).to(obj.energydiv);
-    obj.energysum = new StatElement(strings.energySum, 0).to(obj.energydiv);
+    if (props.worldenergy ?? true) {
+      obj.energydiv = new DivElement().to(obj.bottomstats);
+      obj.energyorganic = new StatElement(strings.energyOrganic, 0).to(obj.energydiv);
+      obj.energycharge = new StatElement(strings.energyCharge, 0).to(obj.energydiv);
+      obj.energyenergy = new StatElement(strings.energyEnergy, 0).to(obj.energydiv);
+      obj.energysum = new StatElement(strings.energySum, 0).to(obj.energydiv);
+    }
     
     obj.clancountdiv = new DivElement().to(obj.bottomstats);
     obj.clancount = new StatElement(strings.clancount, 0).to(obj.clancountdiv);
@@ -429,7 +431,7 @@ function setupSettings(main, props) {
     [2000, strings.setupSunValues[6]]
   ], 500).to(obj.main);
   
-  if (props.density ?? true) obj.density = new SelectElement(strings.setupDensityHeader, [
+  obj.density = new SelectElement(strings.setupDensityHeader, [
     [3, strings.setupDensityValues[0]],
     [4, strings.setupDensityValues[1]],
     [6, strings.setupDensityValues[2]],
@@ -515,24 +517,28 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
     
     if (interface.renderoff.value) {
       interface.canvasdiv.hide();
-      interface.energydiv.hide();
-      interface.clancountdiv.hide();
+      
+      if (interface.energydiv) interface.energydiv.hide();
+      
+      if (interface.clancountdiv) interface.clancountdiv.hide();
     } else {
       interface.canvasdiv.show();
-      interface.energydiv.show();
+      if (interface.energydiv) interface.energydiv.show();
       
       const zoom = interface.getZoom();
       
-      if (lastRenderedFrame !== simulation.frame) updateSimulationEnergy(interface);
+      if (interface.energydiv && lastRenderedFrame !== simulation.frame) updateSimulationEnergy(interface);
       
       if (interface.changed || lastRenderedFrame !== simulation.frame || lastRenderedZoom !== zoom) {
         const { clancount } = render(renderer);
         
-        if (interface.theme.value === "clan") {
-          interface.clancount.value = clancount;
-          
-          interface.clancountdiv.show();
-        } else interface.clancountdiv.hide();
+        if (interface.clancountdiv) {
+          if (interface.theme.value === "clan") {
+            interface.clancount.value = clancount;
+            
+            interface.clancountdiv.show();
+          } else interface.clancountdiv.hide();
+        }
         
         lastRenderedFrame = simulation.frame;
         lastRenderedZoom = zoom;
@@ -674,7 +680,7 @@ function updateSelectInfo(interface) {
   if (type === 2 || type === 3 || type === 4) {
     interface.selectJSON = JSON.stringify({
       name: "",
-      descriotion: "",
+      description: "",
       
       genome: [...simulation.genome.slice(i*genomeLength, (i+1)*genomeLength)],
       consts: simulation.consts,
@@ -682,7 +688,9 @@ function updateSelectInfo(interface) {
       settings: {
         sun: simulation.sun,
         prog: simulation.curprog[i]
-      }
+      },
+      
+      createdDate: Date.now(),
     });
     
     interface.infosave.show("inline");

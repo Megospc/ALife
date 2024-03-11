@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ALife - Demo</title>
   <meta charset="UTF-8">
+  <title>ALife</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,6 +11,7 @@
 </html>
 <script src="strings.js"></script>
 <script src="utils.js"></script>
+<script src="consts.js"></script>
 <script src="style.js"></script>
 <script src="interface.js"></script>
 <script src="main.js"></script>
@@ -20,11 +21,14 @@
   
   const main = new Element("main");
   
-  const simulation = createSimulation(300, 300, {}, generateRandomSeed());
+  const simulation = createSimulation(300, 300, simulationConsts, generateRandomSeed());
   
   const interface = setupInterface("main", simulation, {
     strings,
     language,
+    
+    bottomstats: false,
+    
     targetsize: 1200
   });
   

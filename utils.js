@@ -60,10 +60,18 @@ class Element {
   end() {
     return this.element;
   }
+  
+  remove() {
+    this.element.remove();
+  }
 }
 
 const angleX = [ 0, 1, 0, -1 ];
 const angleY = [ -1, 0, 1, 0 ];
+
+function newCollection() {
+  return Object.create(null);
+}
 
 function callNearby(f) {
   f(-1, -1);
@@ -294,8 +302,10 @@ function getBinWriterMethods(arr) {
   const methods = {
     data: [],
     
+    curindex: 0,
+    
     write8(v) {
-      this.data.push(v & 0xFF);
+      this.data[this.curindex++] = v & 0xFF;
     },
     write16(v) {
       this.write8(v >> 8);
@@ -313,13 +323,15 @@ function getBinWriterMethods(arr) {
       
       this.data = [];
       
+      this.curindex = 0;
+      
       return buf;
     }
   };
   
-  methods.createBitbuf = function() {
+  methods.createBitbuf = function(len) {
     return {
-      data: [],
+      data: len ? new Uint8Array(len):[],
       
       curoffset: 0,
       curindex: -1,
@@ -419,6 +431,74 @@ function closeBenchmark() {
 
 function clearBenchmark() {
   if (benchmarkOn) console.clear();
+}
+
+class ProgressBar extends Element {
+  constructor() {
+    super({
+      elementType: "canvas",
+      className: "progressbar",
+      
+      width: 600,
+      height: 30
+    });
+    
+    this.ctx = this.element.getContext("2d");
+    
+    this.anim = 0;
+  }
+  
+  draw(value) {
+    const ctx = this.ctx;
+    
+    const gradLine = ctx.createLinearGradient(0, 0, 0, 30);
+    gradLine.addColorStop(0, "#1010b0");
+    gradLine.addColorStop(1, "#0000a0");
+    
+    ctx.fillStyle = gradLine;
+    ctx.fillRect(0, 0, 600, 30);
+    
+    const x = Math.floor(value*600);
+    
+    const gradAnim = ctx.createLinearGradient(0, 0, 0, 30);
+    gradAnim.addColorStop(0, "#4040d0");
+    gradAnim.addColorStop(1, "#2020b0");
+    
+    ctx.fillStyle = gradAnim;
+    
+    ctx.beginPath();
+    
+    for (let cx = -this.anim; cx <= x; cx += 20) {
+      ctx.moveTo(cx, 0);
+      ctx.lineTo(cx+10, 0);
+      ctx.lineTo(cx+20, 30);
+      ctx.lineTo(cx+10, 30);
+    }
+    
+    this.anim = (this.anim+1)%20;
+    
+    ctx.fill();
+    
+    const gradBack = ctx.createLinearGradient(0, 0, 0, 30);
+    gradBack.addColorStop(0, "#c0c0c0");
+    gradBack.addColorStop(1, "#a0a0a0");
+    
+    ctx.fillStyle = gradBack;
+    ctx.fillRect(600, 0, x-600, 30);
+    
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "#ffffff";
+    
+    ctx.shadowBlur = 5;
+    
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "24px Monospace";
+    
+    ctx.fillText(Math.floor(value*100)+"%", x/2, 17);
+    
+    ctx.shadowBlur = 0;
+  }
 }
 
 class InputElement extends Element {

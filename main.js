@@ -571,6 +571,7 @@ function iteration(simulation) {
             methods.moveCell(i, k);
             
             penergy[k] = penergy[i];
+            pnenergy[k] = pnenergy[i];
             pcurprog[k] = pcurprog[i];
             pcurrent[k] = (pcurrent[i]+getCommand(2))%genomeWidth;
             pparentwooduniq[k] = 0;
@@ -846,6 +847,7 @@ function iteration(simulation) {
           methods.moveCell(i, k);
           
           penergy[k] = penergy[i];
+          pnenergy[k] = pnenergy[i];
           pcurprog[k] = pcurprog[i];
           pseedshoot[k] = pseedshoot[i]-1;
           pparentwooduniq[k] = 0;

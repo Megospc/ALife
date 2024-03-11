@@ -12,7 +12,7 @@ const languagesStrings = {
       "400x400 (Стандартный)",
       "600x600 (Крупный)",
       "800x800 (Большой)",
-      "1200x1200 (Оргомный)",
+      "1200x1200 (Огромный)",
       "1800x1800 (Гигантский)"
     ],
     setupSunHeader: "Уровень солнца",
@@ -51,6 +51,7 @@ const languagesStrings = {
     setupStart: "запуск",
     setupDownload: "скачать",
     setupSelect: "выбрать",
+    setupCreating: "Создание мира...",
     
     zoom: "Приближение",
     speed: "Скорость",
@@ -61,7 +62,7 @@ const languagesStrings = {
     iteration: "Итерация",
     population: "Живых клеток",
     fps: "FPS",
-    fpsChange: "Введите новый целевой FPS (2-250)",
+    fpsChange: "Введите целевой FPS (2-250)",
     clancount: "Живых кланов",
     rendermodeHeader: "Режим отрисовки",
     rendermodeValues: [
@@ -131,14 +132,24 @@ const languagesStrings = {
     recordStop: "остановить",
     recordStopAsk: "Вы действительно хотите остановить запись? Это действие нельзя отменить.",
     recordMaxsizeReached: "Запись достигла максимального размера",
+    recordSaving: "Архивация...",
+    recordOpening: "Разархивация...",
     
     sandboxHeader: "Песочница",
     sandboxName: "Название",
     sandboxDescription: "Описание",
     
+    aboutHeader: "О программе",
+    aboutVersion: "Версия",
+    aboutDeveloper: "Разработчик",
+    aboutIdea: "Идея от",
+    aboutIdeaValue: `<a href="https://youtube.com/@foo52ru">foo52ru</a>`,
+    aboutGithub: "GitHub",
+    
     toMainpage: "Главная страница",
     toSandbox: "Песочница",
     toRecord: "Чтение записи",
+    toAbout: "О программе",
     
     language: "Сменить язык",
     
@@ -146,7 +157,8 @@ const languagesStrings = {
     
     memoryAsk: (reqmem) => `Необходимо ${filesizeString(reqmem)} оперативной памяти. Запустить?`,
     readFileFailed: "Не удалось открыть файл",
-    webglError: "Упс! Что-то не так с WebGL. Пожалуйста, попробуйте ещё раз или смените браузер/устройство."
+    webglError: "Упс! Что-то не так с WebGL. Пожалуйста, попробуйте ещё раз или смените браузер/устройство.",
+    noMemory: "Упс! Недостаточно памяти, чтобы создать мир. Попробуйте уменьшить его размер."
   },
   "en": {
     setupHeader: "Settings",
@@ -200,11 +212,12 @@ const languagesStrings = {
     setupStart: "start",
     setupDownload: "download",
     setupSelect: "select",
+    setupCreating: "Creating a world...",
     
     zoom: "Zoom",
     speed: "Speed",
     pause: "pause",
-    continue: "continue",
+    continue: "resume",
     tocenter: "to center",
     snapshot: "snapshot",
     iteration: "Iteration",
@@ -280,14 +293,24 @@ const languagesStrings = {
     recordStop: "stop",
     recordStopAsk: "Do you really want to stop the record? You can't undo this.",
     recordMaxsizeReached: "The record has reached maximum size",
+    recordSaving: "Compressing...",
+    recordOpening: "Decompressing...",
     
     sandboxHeader: "Sandbox",
     sandboxName: "Name",
     sandboxDescription: "Description",
     
+    aboutHeader: "About us",
+    aboutVersion: "Version",
+    aboutDeveloper: "Developer",
+    aboutIdea: "Idea from",
+    aboutIdeaValue: `<a href="https://youtube.com/@wallcraft-video">Simulife Hub</a>`,
+    aboutGithub: "GitHub",
+    
     toMainpage: "Home page",
     toSandbox: "Sandbox",
-    toRecord: "Record reader",
+    toRecord: "Recording reader",
+    toAbout: "About us",
     
     language: "Change language",
     
@@ -295,6 +318,7 @@ const languagesStrings = {
     
     memoryAsk: (reqmem) => `It needs ${filesizeString(reqmem)} of RAM. Do you want to start?`,
     readFileFailed: "Failed to open the file",
-    webglError: "Oops! Something wrong with WebGL. Please try again or change the browser/device."
+    webglError: "Oops! Something wrong with WebGL. Please try again or change the browser/device.",
+    noMemory: "Oops! There isn't enough memory to create the world oj your device. Please make it smaller."
   }
 };

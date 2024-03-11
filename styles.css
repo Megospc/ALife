@@ -9,6 +9,12 @@ h1, h2 , h3, input, label, button, p, select, a, b {
   padding-top: 1.5px;
   padding-bottom: 1.5px;
 }
+.progressbar {
+  width: 400px;
+  height: 20px;
+  border: 1px solid #a0a0a0;
+  border-radius: 5px;
+}
 .pagelink {
   color: #0000a0;
   margin-top: 5px;

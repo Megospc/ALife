@@ -4,9 +4,9 @@
 
 Artifical evolution made with JavaScript.
 
-Idea is taken from the project "Battle Of Clans" by [Simulife Hub](https://youtube.com/@wallcraft-video).
+Idea is taken from the project "The Battle Of Clans" by [Simulife Hub](https://youtube.com/@wallcraft-video).
 
-Version: 1.2.5 (05.03.2024)
+Version: 1.3.5 (11.03.2024)
 
 [**DEMOVERSION**](https://megospc.github.io/ALife/demo.html?lang=en)\
 [**FULL VERSION**](https://megospc.github.io/ALife/index.html?lang=en)
@@ -17,56 +17,98 @@ Version: 1.2.5 (05.03.2024)
 <img width="300" src="images/snap3.png">
 <img width="300" src="images/snap4.png">
 <img width="300" src="images/snap5.png">
+<img width="300" src="images/snap6.png">
 
 <details>
   <summary><b>Open me!</b></summary>
-  <img width="900" src="images/snap6.png">
+  <img width="900" src="images/snap-big.png">
 </details>
 
 ## Features
 + It works right in a browser: **you don't need to download anything**, just go by [the link](https://megospc.github.io/ALife/index.html?lang=en).
 + You can run worlds up to **1800x1800 tiles** in size.
-+ It uses WebGL and it renders on your GPU, so **rendering is faster by 10 times**!
-+ The required memory buffer allocates when the simulation starts, so JavaScript's garbage cleaner isn't busy. **This speeds up processing by 2 time**.
++ It renders on GPU using WebGL, so **it's 10x faster**!
++ A required memory buffer allocates when a simulation starts, so JavaScript's garbage cleaner isn't busy. **Processing is 2x faster**.
 + It works on mobile devices.
 
 ## Description
 **ALife** is a simulator of evolution of multicellular organisms.
 
 ### Operating Principle
-The entire field is divided into many squares (a "*Tile*"). Each *tile* contains a some amount of resources: *organic* and *charge*. There may also be a living cell (a "*Cell*") on a tile. Each *cell* has its own supply of energy and consumes a little of it every turn. If there is not enough energy, the cell dies. When a cell dies, it leaves some *organic* and *charge* (amount of charge = energy that was in the cell) in a 3x3 *tile* area. If there is  too much *organic* or *charge* in a tile, it becomes *poisoned*. If a cell is on a *poisoned tile*, it dies. If the *charge* exceeds a certain value, it begins to slowly decrease until it reaches that value.
+The simulation field consists of many squares (a "*Tile*"). Each *tile* contains a some amount of resources: *organic* and *charge*. There may also be a living cell on the tile (a "*Cell*"). Each *cell* has its own energy reserve and consumes a little each turn. If there isn't enough energy, the cell dies. When a cell dies, *organic* and *charge* remain in the 3x3 **tiles** area (amount of charge = energy that was in the cell). If there is too much *organic* or *charge* in a tile, it becomes *poisoned*. The cell dies if its *tile* is *poisoned*.
 
 Cells can be different types:
-+ **Leaf**. Each turn gets energy from the sun. The more *organic* there is in a *tile* under a leaf, the more energy it can get. If two leaves touch, they both stop producing energy.
-+ **Root**. Each turn removes a little *organic* (if any) from the tile under it and gets energy. Does not die from *organic poisoning*.
-+ **Antenna**. Each turn removes a little *charge* (if any) from the tile under it and gets energy. Does not die from *energy poisoning*.
-+ **Shoot**. Consumes a lot of energy. Each shoot has its own *genome* (the program according to which it operates). By following its instructions, shoot can grow, creating up to three new cells around itself (it itself will turn into a wood), eat any *cell* nearby (except wood), etc. As long as it has not given off branches, it can also move around the field and eat organic. Its color depends on the amount of energy, which it has (black - little, white - a lot). If the shoot accumulates a lot of energy, it will fall off the wood to which it is attached and become single-celled.
-+ **Wood**. Transfers energy from producing cells to shoots and seeds.
-+ **Seed**. A dormant shoot that consumes almost no energy. If the wood, to which it is attached, dies, the seed wakes up and turns into a shoot that will continue to carry out the commands of the *genome*. Sometimes, before turning into a shoot, a seed shoots out and flies through a certain number of *tiles*. If it touches another *cell* on its way, this cell and the seed die. It will also fall off and wake up if it accumulates a certain amount of energy.
++ **Leaf**. Each turn gets energy from the sun. The more *organic* there is in a *tile* under a leaf, the more energy it can get. If two leaves touch, both stop producing energy.
++ **Root**. Converts *organic* into energy. Doesn't die on *organic poisoning*.
++ **Aerial**. Collects *charge*. Doesn't die on *energy poisoning*.
++ **Shoot**. Each shoot has its own *genome*. Following the commands of the *genome*, the shoot can create new *cells* around itself, turning into wood, eat any *cell* nearby (except wood), etc. The color of the shoot depends on the amount of energy it has (black - little, white - a lot). If the shoot accumulates 50K energy, it falls off the wood to which it is attached and become single-celled. A single-celled shoot can move around the field and eat organic.
++ **Wood**. Transports energy from producing cells to shoots.
++ **Seed**. A dormant shoot. If the wood to which the seed is attached dies, the seed wakes up and turns into a shoot that will continue to follow the commands of the *genome*. Sometimes, before waking up, a seed shoots out and flies through some number of *tiles*. If the such a seed collides with another *cell*, both die. Also, the seed will fall off and wake up if it accumulates 20K energy.
+
+<table>
+  <thead>
+    <th>Type</th>
+    <th>Consumption</th>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Leaf</th>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>Root</th>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>Aerial</th>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>Wood</th>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>Shoot</th>
+      <td>50</td>
+    </tr>
+    <tr>
+      <th>Seed</th>
+      <td>5</td>
+    </tr>
+  </tbody>
+</table>
 
 <img width="300" src="images/description1en.png">
 
 ### Home Page
-By opening the [home page](https://megospc.github.io/ALife/index.html?lang=eng), you will see the simulation settings:
+On the [home page](https://megospc.github.io/ALife/index.html?lang=en), you see the simulation settings:
 + **Seed**. The number from which the simulation will be created. Simulations with the same settings and seeds will give the same result.
 + **Field size**. The size of the simulation in *tiles*.
 + **Sun level**. The higher the sun level, the more energy leaves can get.
-+ **Initial density**. Density of location of the first shoots. 1/9 means that on every ninth *tile* (on the average) will be a shoot. 1/6 - on every sixth, 1/50 - on every fiftieth, etc.
-+ **Organic, charge**. The amount of organic and charge that will be in each tile when the simulation starts.
++ **Initial density**. Density of location of the first shoots. 1/9 - means that on every ninth *tile* (on the average) will be a shoot. 1/6 - on every sixth, 1/50 - on every fiftieth, etc.
++ **Organic, charge**. The amount of organic and charge that will be in each tile when the simulation will start.
 
 Once you have configured the parameters, click the "Start" button.
 
 <img width="300" src="images/description2en.png">
 
-1. Levers for adjusting zoom/speed.
-2. Buttons. "Pause/Continue" stops/resumes the simulation. "To Center" resets the zoom and camera position. "Snapshot" downloads a snapshot of the view window.
-3. Statistics. "Iteration" is the number of the current simulation frame. "Population" is the current number of cells in the simulation. "FPS" - average number of frames per second.
-4. Rendering modes. Change the color of cells/tiles. "Drawing mode" for cells and "Ground drawing mode" for tiles.
-5. View window. Here you can see what is happening in the simulation. Hold and move the mouse to change the camera's position. You can also click on any tile to see information about it.
-6. Disable rendering. If checked, the view window is hidden.
-7. Productivity and simulation seed.
+1. Levers that control camera zoom and simulation speed.
+2. "Pause/Resume" pauses/resumes the simulation. "To Center" resets camera position and zoom. "Snapshot" saves a snapshot of the world.
+3. "Iteration" - iteration number. "Cells alive" - the current number of alive cells. "FPS" - the average number of frames per second, click to change the goal FPS.
+4. Rendering mode control. "Rendering mode" for cells and "Backgound rendering mode" for tiles.
+5. Shows what is happening in the world. Hold and move the mouse to change the camera position. Click on a tile to select it.
+6. Counters of energy in the world. "Organic" - the amount of energy in organic form. "Charge" - amount of charge. "Energy" - amount of energy in living cells. "Total" - the sum of all counters.
+7. If checked, rendering is disabled.
+8. Productivity. "Rendering time" - the time spent rendering the current frame. "Processing time" - the time spent processing the current frame. "Productivity" - the average number of living cells that can be processed per second.
+9. Simulation seed.
+10. Recording control. "Save" - saves the recording. "Stop" - stops recording.
 
 ### Sandbox
-In the sandbox, you can look at the growth of one species separately. To go to the sandbox, select a tile with a shoot or a seed and click the "Save" button. After this, the sandbox will open in a new tab. The genome of the selected shoot (seed) will be loaded into it. You can change the name/description of the species, save it as a file by clicking the "Download" button and run it. To do last, configure the parameters and click "Start". Once you have saved the species file, you can open it by following the "Sandbox" link on the home page and selecting it.
+The sandbox shows the development of one species separately. To go to the sandbox, select a tile with a shoot or a seed and click the "Save" button. The sandbox will open in a new tab. The genome of the selected shoot (seed) will be loaded into it.
+
+Click the "Download" button to save the species as a file. To open the species, follow the "Sandbox" link on the main page.
+
+### Recording reader
+To open a recording, follow the "Recording reader" link on the main page.
 
 *If someting isn't clear enough, please, write about it in Issues.*

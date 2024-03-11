@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ALife</title>
   <meta charset="UTF-8">
+  <title>ALife</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="headdiv">
     <h1 id="header" class="header"></h1>
-    <a id="mainpage"></a>
+    <a id="mainpage" class="pagelink"></a>
   </div>
   <div id="select">
     <input type="file" id="fileinput" style="display: none" onchange="readFile(this.files[0])">
@@ -47,94 +47,115 @@
   
   setupLanguageChanger(new DivElement().to(select), strings, language);
   
+  const progdiv = new DivElement().to(document.body).hide();
+  
+  const proglabel = new Element({
+    elementType: "p",
+    className: "label"
+  }).to(progdiv);
+  
+  const progress = new ProgressBar().to(progdiv);
+  
   var obj, settings, simulation, interface, interval;
   
   function parse(buffer) {
     const u8 = new Uint8Array(buffer);
     
-    const reader = createReader(u8);
+    proglabel.attr("textContent", strings.recordOpening);
     
-    const simulation = reader.simulation;
-    
-    const targetsize = 
-      simulation.width == 800 ? 1600:
-      simulation.width == 1800 ? 1800:1200;
-    
-    interface = setupInterface("main", simulation, {
-      strings,
-      language,
-      targetsize,
-      
-      bottomstats: false,
-      
-      framereset: function() {
-        reader.reset();
-        
-        readFrame(reader);
-      }
-    });
-    
-    renderer = createRenderer(interface, simulation, style);
-    
-    let lastTime = performance.now();
-    let lastRenderedFrame = -1;
-    let lastRenderedZoom = -1;
-    let lastHandleFrame = 0;
-    let frame = 0;
-    
-    setInterval(() => {
-      const handlestart = performance.now();
-      
-      if (!reader.isEnd && !interface.paused && (frame-lastHandleFrame) >= (20-interface.speed.value)) {
-        readFrame(reader);
-        
-        lastHandleFrame = frame;
-      }
-      
-      const handletime = performance.now()-handlestart;
-      
-      const renderstart = performance.now();
-      
-      if (interface.renderoff.value) interface.canvasdiv.hide();
-      else {
-        const zoom = interface.getZoom();
-        
-        if (interface.changed || lastRenderedFrame !== simulation.frame || lastRenderedZoom !== zoom) {
-          render(renderer, {
-            nopictures: true
-          });
-          
-          lastRenderedFrame = simulation.frame;
-          lastRenderedZoom = zoom;
-          
-          interface.changed = false;
-        }
-        
-        interface.canvasdiv.show();
-      }
-      
-      const rendertime = performance.now()-renderstart;
-      
-      interface.frame.value = simulation.frame;
-      interface.population.value = simulation.population;
-      
-      interface.handletime.value = Math.floor(handletime);
-      interface.rendertime.value = Math.floor(rendertime);
-      
-      interface.performance.value = performanceString(simulation.width*simulation.height, handletime);
-      
-      frame++;
-      
-      if (frame%10 === 0) {
-        const time = performance.now();
-        
-        interface.fps.value = (1000/(time-lastTime)*10).toFixed(1);
-        
-        lastTime = time;
-      }
-    }, 25);
+    progdiv.show();
     
     select.hide();
-    main.show();
+    
+    createReader(u8, progress, function(reader) {
+      progdiv.hide();
+      
+      const simulation = reader.simulation;
+      
+      const targetsize = 
+        simulation.width == 800 ? 1600:
+        simulation.width == 1800 ? 1800:1200;
+      
+      interface = setupInterface("main", simulation, {
+        strings,
+        language,
+        targetsize,
+        
+        worldenergy: false,
+        
+        framereset: function() {
+          reader.reset();
+          
+          readFrame(reader);
+        }
+      });
+      
+      renderer = createRenderer(interface, simulation, style);
+      
+      let lastTime = performance.now();
+      let lastRenderedFrame = -1;
+      let lastRenderedZoom = -1;
+      let lastHandleFrame = 0;
+      let frame = 0;
+      
+      setInterval(() => {
+        const handlestart = performance.now();
+        
+        if (!reader.isEnd() && !interface.paused && (frame-lastHandleFrame) >= (20-interface.speed.value)) {
+          readFrame(reader);
+          
+          lastHandleFrame = frame;
+        }
+        
+        const handletime = performance.now()-handlestart;
+        
+        const renderstart = performance.now();
+        
+        if (interface.renderoff.value) {
+          interface.canvasdiv.hide();
+          interface.clancountdiv.hide();
+        } else {
+          const zoom = interface.getZoom();
+          
+          if (interface.changed || lastRenderedFrame !== simulation.frame || lastRenderedZoom !== zoom) {
+            render(renderer, {
+              nopictures: true
+            });
+            
+            lastRenderedFrame = simulation.frame;
+            lastRenderedZoom = zoom;
+            
+            interface.changed = false;
+          }
+          
+          interface.clancount.value = reader.clancount;
+          
+          interface.canvasdiv.show();
+          interface.clancountdiv.show();
+        }
+        
+        const rendertime = performance.now()-renderstart;
+        
+        interface.frame.value = simulation.frame;
+        interface.population.value = simulation.population;
+        
+        interface.handletime.value = Math.floor(handletime);
+        interface.rendertime.value = Math.floor(rendertime);
+        
+        interface.performance.value = performanceString(simulation.width*simulation.height, handletime);
+        
+        frame++;
+        
+        if (frame%10 === 0) {
+          const time = performance.now();
+          
+          interface.fps.value = (1000/(time-lastTime)*10).toFixed(1);
+          
+          lastTime = time;
+        }
+      }, 25);
+      
+      main.show();
+    });
   }
 </script>

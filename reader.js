@@ -1,95 +1,89 @@
-function createReader(data) {
+function createReader(data, progress, callback) {
   const methods = getBinReaderMethods(data);
   
-  const version = methods.read8();
-  const width = methods.read16();
-  const height = methods.read16();
-  const seed = methods.read32();
+  const reader = {};
   
-  const simulation = createSimulation(width, height, {
-    maxOrganic: 1,
-    maxCharge: 1
-  }, seed);
+  const compression = methods.read8();
   
-  const reader = {
-    width,
-    height,
+  if (compression === 0) whenDecompressed(getBinReaderMethods(data.slice(1)));
+  
+  function whenDecompressed(methods) {
+    const version = methods.read8();
+    const width = methods.read16();
+    const height = methods.read16();
+    const seed = methods.read32();
     
-    methods,
+    const simulation = createSimulation(width, height, {
+      maxOrganic: 256,
+      maxCharge: 256
+    }, seed);
     
-    simulation,
+    reader.version = version;
     
-    version,
-    methods,
-    data,
+    reader.clanBits = 0;
     
-    clanbits: 0,
+    reader.indexBits = Math.ceil(Math.log2(width*height));
     
-    indexBitsize: Math.ceil(Math.log2(width*height)),
+    reader.methods = methods;
     
-    reset() {
+    reader.simulation = simulation;
+    
+    reader.reset = function() {
       methods.cursor(9);
       
       simulation.type.fill(0);
       simulation.organic.fill(0);
       simulation.charge.fill(0);
       simulation.clan.fill(0);
-    },
+      
+      reader.clanBits = 0;
+      
+      readFrame(reader);
+    };
     
-    get isEnd() {
-      return methods.isEnd;
-    }
-  };
-  
-  return reader;
+    reader.isEnd = () => methods.isEnd;
+    
+    callback(reader);
+  }
 }
 
 function readFrame(reader) {
-  const simulation = reader.simulation;
-  
-  const version = reader.version;
-  
-  const indexBitsize = reader.indexBitsize;
-  
   const methods = reader.methods;
+  const version = reader.version;
+  const simulation = reader.simulation;
   
   simulation.frame = methods.read32();
   simulation.population = methods.read32();
   
-  const clancount = methods.read32();
-  
-  const clanbits = Math.ceil(Math.log2(clancount));
-  
-  if (version >= 3 && clanbits !== reader.clanbits) {
-    reader.clanbits = clanbits;
-    reader.clans = {};
+  if (version >= 3) {
+    const clancount = methods.read32();
     
-    for (let i = 0; i < clancount; i++) reader.clans[i] = methods.read32();
+    reader.clancount = clancount;
+    
+    const clanBits = Math.ceil(Math.log2(clancount));
+    
+    if (clanBits !== reader.clanBits) {
+      reader.clanBits = clanBits;
+      reader.clans = {};
+      
+      for (let i = 0; i < clancount; i++) reader.clans[i] = methods.read32();
+    }
   }
   
   const changes = methods.read32();
   
   const buffer = methods.createBitbuf();
   
-  if (version >= 3) {
-    const clanbits = Math.ceil(Math.log2(clancount));
-    
-    for (let i = 0; i < changes; i++) {
-      const index = buffer.read(indexBitsize);
-      
-      simulation.type[index] = buffer.read(3);
-      
-      simulation.organic[index] = buffer.readBit();
-      simulation.charge[index] = buffer.readBit();
-      
-      if (simulation.type[index]) simulation.clan[index] = reader.clans[buffer.read(clanbits)];
-    }
-  } else if (version >= 2) for (let i = 0; i < changes; i++) {
-    const index = buffer.read(indexBitsize);
+  for (let i = 0; i < changes; i++) {
+    const index = buffer.read(reader.indexBits);
     
     simulation.type[index] = buffer.read(3);
     
-    simulation.organic[index] = buffer.readBit();
-    simulation.charge[index] = buffer.readBit();
-  } else for (let i = 0; i < changes; i++) simulation.type[buffer.read(indexBitsize)] = buffer.read(3);
+    if (version >= 2) {
+      simulation.organic[index] = buffer.readBit()*256;
+      simulation.charge[index] = buffer.readBit()*256;
+    }
+    
+    if (version >= 3 && simulation.type[index] > 0) simulation.clan[index] = reader.clans[buffer.read(reader.clanBits)];
+  }
 }
