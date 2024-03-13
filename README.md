@@ -6,7 +6,7 @@ Artifical evolution made with JavaScript.
 
 Idea is taken from the project "The Battle Of Clans" by [Simulife Hub](https://youtube.com/@wallcraft-video).
 
-Version: 1.3.5 (11.03.2024)
+Version: 1.4.7 (13.03.2024)
 
 [**DEMOVERSION**](https://megospc.github.io/ALife/demo.html?lang=en)\
 [**FULL VERSION**](https://megospc.github.io/ALife/index.html?lang=en)
@@ -101,14 +101,15 @@ Once you have configured the parameters, click the "Start" button.
 7. If checked, rendering is disabled.
 8. Productivity. "Rendering time" - the time spent rendering the current frame. "Processing time" - the time spent processing the current frame. "Productivity" - the average number of living cells that can be processed per second.
 9. Simulation seed.
-10. Recording control. "Save" - saves the recording. "Stop" - stops recording.
+10. Saves simulation as a file. To open it, click the "Import" button in simulation settings.
+11. Recording control. "Save" - saves the recording. "Stop" - stops recording.
 
 ### Sandbox
 The sandbox shows the development of one species separately. To go to the sandbox, select a tile with a shoot or a seed and click the "Save" button. The sandbox will open in a new tab. The genome of the selected shoot (seed) will be loaded into it.
 
-Click the "Download" button to save the species as a file. To open the species, follow the "Sandbox" link on the main page.
+Click the "Download" button to save the species as a file. To open the species, follow the "Sandbox" link on the home page.
 
 ### Recording reader
-To open a recording, follow the "Recording reader" link on the main page.
+To open a recording, follow the "Recording reader" link on the home page.
 
 *If someting isn't clear enough, please, write about it in Issues.*
