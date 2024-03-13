@@ -5,6 +5,8 @@ const simulationConsts = {
   sproutCost: 3700,
   seedCost: 3700,
   
+  rootCantBeEaten: true,
+  
   seedShotBaseCost: 3700,
   seedShotDistanceCost: 0,
   

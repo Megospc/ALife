@@ -89,6 +89,10 @@ const languagesStrings = {
     performance: "Производительность",
     seed: "Семя",
     ms: "мс",
+    export: "экспорт",
+    import: "импорт",
+    exporting: "Экспортация...",
+    importing: "Импортация...",
     
     energyOrganic: "Органика",
     energyCharge: "Заряд",
@@ -250,6 +254,10 @@ const languagesStrings = {
     performance: "Productivity",
     seed: "Seed",
     ms: "ms",
+    export: "export",
+    import: "import",
+    exporting: "Exporting...",
+    importing: "Importing...",
     
     energyOrganic: "Organic",
     energyCharge: "Charge",

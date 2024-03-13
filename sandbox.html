@@ -10,9 +10,7 @@
     <h1 id="header" class="header"></h1>
     <a id="mainpage" class="pagelink"></a>
   </div>
-  <div id="select">
-    <input type="file" id="fileinput" style="display: none" onchange="readFile(this.files[0])">
-  </div>
+  <div id="select"></div>
   <div id="edit"></div>
   <div id="setup"></div>
   <div id="main"></div>
@@ -25,15 +23,6 @@
 <script src="main.js"></script>
 <script src="render.js"></script>
 <script>
-  function readFile(file) {
-    const reader = new FileReader();
-    
-    reader.readAsText(file);
-    
-    reader.onload = () => parseJSON(reader.result);
-    reader.onerror = () => alert(strings.readFileFailed);
-  }
-  
   const { language, strings } = getWindowStrings(languagesStrings);
   
   const select = new Element("select");
@@ -46,7 +35,7 @@
     .attr("textContent", strings.toMainpage)
     .attr("href", "index.html?lang="+language);
   
-  new ButtonElement(strings.setupSelect, () => document.getElementById("fileinput").click()).to(select);
+  new ButtonElement(strings.setupSelect, () => callFileSelector(parse)).to(select);
   
   new Element({
     elementType: "label",
@@ -104,6 +93,10 @@
     obj.changedDate = Date.now();
     
     return JSON.stringify(obj);
+  }
+  
+  function parse(file) {
+    readFileAsText(file, parseJSON, () => alert(strings.readFileFailed));
   }
   
   function parseJSON(json) {
@@ -183,7 +176,7 @@
     function createWorld(i, callback) {
       const start = performance.now();
       
-      while (i & 1023 || performance.now()-start < 20) {
+      while (performance.now()-start < 10) {
         simulation.organic[i] = organic;
         simulation.charge[i] = charge;
         

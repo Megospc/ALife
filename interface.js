@@ -144,6 +144,12 @@ function setupInterface(main, simulation, props = {}) {
   obj.performance = new StatElement(strings.performance, 0).to(obj.undercanvas);
   obj.seed = new StatElement(strings.seed, simulation.seed).to(obj.undercanvas);
   
+  if (props.export) {
+    obj.exportdiv = new DivElement().to(obj.undercanvas);
+    
+    obj.export = new ButtonElement(strings.export, props.export).to(obj.exportdiv);
+  }
+  
   if (props.record) {
     obj.recorddiv = new DivElement().to(obj.undercanvas);
     
@@ -471,7 +477,10 @@ function setupSettings(main, props) {
   }
   
   obj.buttons = new DivElement().to(obj.main);
-  obj.start = new ButtonElement(strings.setupStart, () => props.onstart()).to(obj.buttons);
+  
+  obj.start = new ButtonElement(strings.setupStart, props.onstart).to(obj.buttons);
+  
+  if (props.import) obj.import = new ButtonElement(strings.import, props.import).to(obj.buttons);
   
   obj.randomSeed = function() {
     obj.seed.value = generateRandomSeed();
@@ -596,7 +605,7 @@ function updateSimulationEnergy(interface) {
   let energy = 0;
   
   for (let i = 0; i < simulation.energy.length; i++) {
-    if (simulation.type[i]) energy += simulation.energy[i];
+    if (simulation.type[i]) energy += simulation.energy[i]+organicCost*9;
     
     organic += simulation.organic[i]*organicCost;
     charge += simulation.charge[i];
@@ -608,6 +617,250 @@ function updateSimulationEnergy(interface) {
   interface.energycharge.value = bigNumberString(charge);
   interface.energyenergy.value = bigNumberString(energy);
   interface.energysum.value = bigNumberString(sum);
+}
+
+function exportSimulation(simulation, progress, callback) {
+  const consts = simulation.consts;
+  
+  const genomeWidth = consts.genomeWidth;
+  const genomeHeight = consts.genomeHeight;
+  const genomeLength = genomeWidth*genomeHeight;
+  
+  const bitsToBytes = bits => Math.ceil(bits/8);
+  const valuesToBits = values => Math.ceil(Math.log2(values));
+  
+  const headerObject = {
+    version: 1,
+    
+    consts,
+    
+    width: simulation.width,
+    height: simulation.height,
+    
+    seed: simulation.seed,
+    random: simulation.random,
+    
+    frame: simulation.frame,
+    population: simulation.population,
+    lastUniq: simulation.lastUniq,
+    
+    sun: simulation.sun
+  };
+  
+  const headerJSON = JSON.stringify(headerObject);
+  
+  const headerData = encodeText(headerJSON);
+  
+  const data = [];
+  
+  const methods = getBinWriterMethods(data);
+  
+  methods.write32(headerData.length);
+  
+  for (let i = 0; i < headerData.length; i++) methods.write8(headerData[i]);
+  
+  const two32 = 2**32;
+  
+  function writeUniq(uniq) {
+    methods.write32(uniq >> 0);
+    methods.write32(uniq/two32);
+  }
+  
+  function write(i) {
+    const start = performance.now();
+    
+    while (performance.now()-start < 10) {
+      methods.write32(simulation.organic[i]);
+      methods.write32(simulation.charge[i]);
+      
+      const type = simulation.type[i];
+      
+      methods.write8(type);
+      
+      if (type > 0) {
+        methods.write8(simulation.angle[i]);
+        methods.write32(simulation.energy[i]);
+        methods.write32(simulation.clan[i]);
+        
+        writeUniq(simulation.uniq[i]);
+        
+        if (type === 1) {
+          const i4 = i << 2;
+          
+          for (let j = 0; j < 4; j++) {
+            methods.write8(simulation.woodshape[i4+j]);
+            
+            writeUniq(simulation.wooduniqs[i4+j]);
+          }
+          
+          methods.write8(simulation.woodinfo[i]);
+        }
+        
+        methods.write8(simulation.parentwood[i]);
+        
+        writeUniq(simulation.parentwooduniq[i]);
+        
+        if (type === 2 || type === 3 || type === 4) {
+          if (type === 2) methods.write8(simulation.current[i]);
+          
+          methods.write8(simulation.curprog[i]);
+          
+          methods.write32(simulation.mutations[i]);
+          
+          if (type === 4) methods.write8(simulation.seedshoot[i]);
+          
+          const ig = i*genomeLength;
+          
+          for (let j = 0; j < genomeLength; j++) methods.write8(simulation.genome[ig+j]);
+        }
+        
+        methods.write32(simulation.placeid[i]);
+      }
+      
+      if (++i === simulation.type.length) {
+        final();
+        
+        return;
+      }
+    }
+    
+    progress.draw(i/simulation.type.length);
+    
+    setTimeout(() => write(i));
+  }
+  
+  write(0);
+  
+  function final() {
+    for (let i = 1; i < simulation.emptyPlaces.length; i++) {
+      const arr = simulation.emptyPlaces[i];
+      
+      methods.write32(arr.length);
+      
+      for (let j = 0; j < arr.length; j++) methods.write32(arr[j]);
+    }
+    
+    methods.compress();
+    
+    const blob = new Blob(data, { type: "application/octet-stream" });
+    
+    downloadBlob(blob, "alife.alife-frame");
+    
+    callback();
+  }
+}
+
+function importSimulation(data, progress, callback) {
+  const methods = getBinReaderMethods(data);
+  
+  const length = methods.read32();
+  
+  const headerJSON = decodeText(data.slice(4, length+4));
+  
+  const headerObject = JSON.parse(headerJSON);
+  
+  methods.cursor(length+4);
+  
+  const consts = headerObject.consts;
+  
+  const genomeWidth = consts.genomeWidth;
+  const genomeHeight = consts.genomeHeight;
+  const genomeLength = genomeWidth*genomeHeight;
+  
+  const simulation = createSimulation(headerObject.width, headerObject.height, consts, headerObject.seed);
+  
+  simulation.random = headerObject.random;
+  simulation.frame = headerObject.frame;
+  simulation.population = headerObject.population;
+  simulation.lastUniq = headerObject.lastUniq;
+  simulation.sun = headerObject.sun;
+  
+  const two32 = 2**32;
+  
+  function readUniq() {
+    return methods.read32()+methods.read32()*two32;
+  }
+  
+  function read(i) {
+    const start = performance.now();
+    
+    while (performance.now()-start < 10) {
+      simulation.organic[i] = methods.read32();
+      simulation.charge[i] = methods.read32();
+      
+      const type = methods.read8();
+      
+      simulation.type[i] = type;
+      
+      if (type > 0) {
+        simulation.angle[i] = methods.read8();
+        
+        simulation.energy[i] = methods.read32();
+        simulation.clan[i] = methods.read32();
+        
+        simulation.uniq[i] = readUniq();
+        
+        if (type === 1) {
+          const i4 = i << 2;
+          
+          for (let j = 0; j < 4; j++) {
+            simulation.woodshape[i4+j] = methods.read8();
+            simulation.wooduniqs[i4+j] = readUniq();
+          }
+          
+          simulation.woodinfo[i] = methods.read8();
+        }
+        
+        simulation.parentwood[i] = methods.read8();
+        simulation.parentwooduniq[i] = readUniq();
+        
+        if (type === 2 || type === 3 || type === 4) {
+          if (type === 2) simulation.current[i] = methods.read8();
+          
+          simulation.curprog[i] = methods.read8();
+          
+          simulation.mutations[i] = methods.read32();
+          
+          if (type === 4) simulation.seedshoot[i] = methods.read8();
+          
+          const ig = i*genomeLength;
+          
+          for (let j = 0; j < genomeLength; j++) simulation.genome[ig+j] = methods.read8();
+        }
+        
+        simulation.placeid[i] = methods.read32();
+        
+        simulation.arr[type][simulation.placeid[i]] = i;
+      }
+      
+      if (++i === simulation.type.length) {
+        final();
+        
+        return;
+      }
+    }
+    
+    progress.draw(i/simulation.type.length);
+    
+    setTimeout(() => read(i));
+  }
+  
+  read(0);
+  
+  function final() {
+    for (let i = 1; i < simulation.arr.length; i++) {
+      const length = methods.read32();
+      
+      for (let j = 0; j < length; j++) {
+        const v = methods.read32();
+        
+        simulation.arr[i][v] = -1;
+        simulation.emptyPlaces[i].push(v);
+      }
+    }
+    
+    callback(simulation);
+  }
 }
 
 function updateSelectInfo(interface) {

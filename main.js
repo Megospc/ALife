@@ -174,6 +174,7 @@ function getSimulationMethods(simulation) {
       simulation.arr[simulation.type[i]][simulation.placeid[i]] = k;
       
       simulation.isDead[k] = 0;
+      simulation.isNew[k] = 0;
       
       simulation.placeid[k] = simulation.placeid[i];
       simulation.uniq[k] = simulation.uniq[i];
@@ -273,6 +274,7 @@ function iteration(simulation) {
   const rootInitial = consts.rootInitial;
   const rootConsumption = consts.rootConsumption;
   const rootSpeed = consts.rootSpeed;
+  const rootCantBeEaten = consts.rootCantBeEaten;
   
   const aerialCost = consts.aerialCost;
   const aerialInitial = consts.aerialInitial;
@@ -492,6 +494,8 @@ function iteration(simulation) {
               penergy[k] = producerAvg;
               pcurprog[k] = getProg(j+5);
               
+              pnenergy[k] = 0;
+              
               shape = 0b10;
             }
             if (type === 5) {
@@ -503,6 +507,8 @@ function iteration(simulation) {
               pcurprog[k] = getProg(j+5);
               pseedshoot[k] = getCommand(j+8)%seedShootDistance+1;
               
+              pnenergy[k] = 0;
+              
               shape = 0b10;
             }
             if (type >= 6 && type < 14) {
@@ -513,6 +519,8 @@ function iteration(simulation) {
               penergy[k] = producerAvg;
               pcurprog[k] = getProg(j+5);
               pcurrent[k] = 0;
+              
+              pnenergy[k] = 0;
               
               shape = 0b10;
             }
@@ -586,7 +594,7 @@ function iteration(simulation) {
         const angle = correctAngle(pangle[i]+getCommand(1));
         const k = methods.nearIndexByAngle(i, angle);
         
-        if (!simulation.isNew[k] && !simulation.isDead[i] && ptype[k] > 1) {
+        if (!simulation.isNew[k] && !simulation.isDead[i] && ptype[k] > 1 && (!rootCantBeEaten || ptype[k] !== 6)) {
           penergy[i] += organicCost*9+sproutEatEnergyPart*penergy[k];
           
           methods.dead(k, 0, 1-sproutEatEnergyPart);
@@ -828,12 +836,6 @@ function iteration(simulation) {
     
     penergy[i] -= seedConsumption;
     
-    if (penergy[i] > seedFallEnergy) {
-      puniq[i] = simulation.lastUniq++;
-      
-      pparentwooduniq[i] = 0;
-    }
-    
     const k = methods.nearIndexByAngle(i, pparentwood[i]);
     
     if (ptype[k] === 0 || puniq[k] !== pparentwooduniq[i]) {
@@ -860,6 +862,10 @@ function iteration(simulation) {
         
         pcurrent[i] = 0;
       }
+    } else if (penergy[i] > seedFallEnergy) {
+      puniq[i] = simulation.lastUniq++;
+      
+      pparentwooduniq[i] = 0;
     }
   });
   
@@ -1091,6 +1097,7 @@ function getSimulationConsts(consts) {
     rootConsumption: consts.rootConsumption ?? 10,
     rootInitial: consts.rootInitial ?? consts.producerAvg ?? 100,
     rootSpeed: consts.rootSpeed ?? 3,
+    rootCantBeEaten: consts.rootCantBeEaten ?? false,
     
     aerialCost: consts.aerialCost ?? 3000,
     aerialConsumption: consts.aerialConsumption ?? 10,

@@ -66,6 +66,10 @@ class Element {
   }
 }
 
+const kib = 1024;
+const mib = kib*1024;
+const gib = mib*1024;
+
 const angleX = [ 0, 1, 0, -1 ];
 const angleY = [ -1, 0, 1, 0 ];
 
@@ -234,18 +238,20 @@ function hexGradient(hex1, hex2, i) {
 
 function hueToRgb(h) {
   h %= 1;
-  h *= 6;
+  h *= 8;
   
   const v = h%1;
   
   const c = Math.floor(h);
   
-  if (c === 0) return [1, v, 0];
-  if (c === 1) return [1-v, 1, 0];
-  if (c === 2) return [0, 1, v];
-  if (c === 3) return [0, 1-v, 1];
-  if (c === 4) return [v, 0, 1];
-  if (c === 5) return [1, 0, 1-v];
+  if (c === 0) return [1, v/2, 0];
+  if (c === 1) return [1, 0.5+v/2, 0];
+  if (c === 2) return [1-v, 1, 0];
+  if (c === 3) return [0, 1, v];
+  if (c === 4) return [0, 1-v, 1];
+  if (c === 5) return [v, 0, 1];
+  if (c === 6) return [1, 0, 1-v/2];
+  if (c === 7) return [1, 0, 0.5-v/2];
 }
 
 function fixedString(str, length) {
@@ -296,6 +302,46 @@ function downloadText(text, name) {
   });
   
   downloadBlob(blob, name);
+}
+
+function encodeText(text) {
+  const encoder = new TextEncoder();
+  
+  return encoder.encode(text);
+}
+
+function decodeText(data) {
+  const encoder = new TextDecoder();
+  
+  return encoder.decode(data);
+}
+
+function readFileAsText(file, ok, err) {
+  const reader = new FileReader();
+  
+  reader.readAsText(file);
+  
+  reader.onload = () => ok(reader.result);
+  reader.onerror = () => err();
+}
+
+function readFileAsBuffer(file, ok, err) {
+  const reader = new FileReader();
+  
+  reader.readAsArrayBuffer(file);
+  
+  reader.onload = () => ok(reader.result);
+  reader.onerror = () => err();
+}
+
+function callFileSelector(f) {
+  const input = document.createElement("input");
+  
+  input.type = "file";
+  
+  input.onchange = () => f(input.files[0]);
+  
+  input.click();
 }
 
 function getBinWriterMethods(arr) {

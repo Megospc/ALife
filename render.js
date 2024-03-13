@@ -54,8 +54,8 @@ function render(renderer, props = {}) {
       
       giv /= energyUnit;
       
-      if (giv < 100) return hexGradient(style.wood1, style.wood2, giv/100);
-      else return hexGradient(style.wood2, style.wood3, (giv-100)/400);
+      if (giv < 300) return hexGradient(style.wood1, style.wood2, giv/300);
+      else return hexGradient(style.wood2, style.wood3, (giv-300)/1200);
     }
     
     function scaleX(x) {
@@ -395,6 +395,8 @@ function render(renderer, props = {}) {
   
   if (interface.showCenter) {
     const px = canvas.attr("width")/200;
+    const cx = canvas.attr("width")/2;
+    const cy = canvas.attr("height")/2;
     
     ctx.lineCap = "round";
     
@@ -404,10 +406,10 @@ function render(renderer, props = {}) {
     
     ctx.beginPath();
     
-    ctx.moveTo(90*px, 100*px);
-    ctx.lineTo(110*px, 100*px);
-    ctx.moveTo(100*px, 90*px);
-    ctx.lineTo(100*px, 110*px);
+    ctx.moveTo(cx-10*px, cy);
+    ctx.lineTo(cx+10*px, cy);
+    ctx.moveTo(cx, cy-10*px);
+    ctx.lineTo(cx, cy+10*px);
     
     ctx.stroke();
   }
@@ -469,7 +471,7 @@ uniform int theme;
 uniform int backtheme;
 
 vec4 hue(float hue) {
-  hue *= 6.;
+  hue *= 8.;
   
   float v = hue;
   
@@ -477,12 +479,14 @@ vec4 hue(float hue) {
   
   int c = int(hue);
   
-  if (c == 0) return vec4(1., v, 0, 1.);
-  if (c == 1) return vec4(1.-v, 1, 0, 1.);
-  if (c == 2) return vec4(0, 1., v, 1.);
-  if (c == 3) return vec4(0, 1.-v, 1., 1.);
-  if (c == 4) return vec4(v, 0, 1., 1.);
-  if (c == 5) return vec4(1., 0, 1.-v, 1.);
+  if (c == 0) return vec4(1., v/2., 0, 1.);
+  if (c == 1) return vec4(1., 0.5+v/2., 0, 1.);
+  if (c == 2) return vec4(1.-v, 1, 0, 1.);
+  if (c == 3) return vec4(0, 1., v, 1.);
+  if (c == 4) return vec4(0, 1.-v, 1., 1.);
+  if (c == 5) return vec4(v, 0, 1., 1.);
+  if (c == 6) return vec4(1., 0, 1.-v/2., 1.);
+  if (c == 7) return vec4(1., 0, 0.5-v/2., 1.);
 }
 
 vec4 woodcolor(float units) {
@@ -492,8 +496,8 @@ vec4 woodcolor(float units) {
   const vec4 wood12 = wood2-wood1;
   const vec4 wood23 = wood3-wood2;
   
-  if (units < 100.) return wood1+wood12*units/100.;
-  else return wood2+wood23*(units-100.)/400.;
+  if (units < 300.) return wood1+wood12*units/300.;
+  else return wood2+wood23*(units-300.)/1200.;
 }
 
 void main() {
