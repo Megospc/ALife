@@ -15,7 +15,9 @@ function createReader(data, progress, callback) {
     
     const simulation = createSimulation(width, height, {
       maxOrganic: 256,
-      maxCharge: 256
+      maxCharge: 256,
+      
+      organicCost: 1
     }, seed);
     
     reader.version = version;

@@ -1,23 +1,32 @@
 const simulationConsts = {
-  rootCost: 3700,
-  aerialCost: 3700,
-  leafCost: 3700,
-  sproutCost: 3700,
-  seedCost: 3700,
+  rootCost: 2800,
+  aerialCost: 2800,
+  leafCost: 2800,
+  sproutCost: 2800,
+  seedCost: 2800,
+  
+  mutationChance: 0.1,
+  
+  seedFallEnergy: 30000,
+  sproutOnecellMax: true,
   
   rootCantBeEaten: true,
   
-  seedShotBaseCost: 3700,
+  seedShotBaseCost: 2800,
   seedShotDistanceCost: 0,
+  seedShotDistance: 16,
+  onlyManycellCanShoot: true,
   
-  lookDistance: 5,
+  lookDistance: 3,
   
-  organicAdd: 2,
+  maxOrganic: 50000,
+  addOrganic: 300,
   
-  organicCost: 200,
-  sproutOrganicEat: 200,
+  organicCost: 1,
+  sproutOrganicEat: 1,
+  sproutOrganicEatSpeed: 180,
   
-  rootSpeed: 1,
+  rootSpeed: 200,
   aerialSpeed: 200,
   
   organicMoving: 0,
@@ -31,8 +40,8 @@ const simulationConsts = {
   
   seedShootCanKillNearby: true,
   
-  genomeHeight: 7,
-  genomeWidth: 40,
+  genomeHeight: 10,
+  genomeWidth: 32,
   
   chargeStep: 0,
   

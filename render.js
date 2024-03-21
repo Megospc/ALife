@@ -41,6 +41,8 @@ function render(renderer, props = {}) {
     const maxOrganic = consts.maxOrganic;
     const maxCharge = consts.maxCharge;
     
+    const organicCost = consts.organicCost;
+    
     const energyUnit = consts.energyUnit;
     
     const sproutFallEnergy = consts.sproutFallEnergy;
@@ -206,6 +208,22 @@ function render(renderer, props = {}) {
       
       ctx.fillRect(scaleX(x-0.5)+gridw/2, scaleY(y-0.5)+gridw/2, cellsize-gridw, cellsize-gridw);
     }
+    if (backtheme === "sum") {
+      const maxSum = maxOrganic*organicCost+maxCharge;
+      
+      for (let x = sx; x < ex; x++) for (let y = sy; y < ey; y++) {
+        const i = x+y*width;
+        
+        const organic = simulation.organic[i];
+        const charge = simulation.charge[i];
+        
+        const sum = organic*organicCost+charge;
+        
+        ctx.fillStyle = hexGradient("#ffffff", "#000000", sum/maxSum);
+        
+        ctx.fillRect(scaleX(x-0.5)+gridw/2, scaleY(y-0.5)+gridw/2, cellsize-gridw, cellsize-gridw);
+      }
+    }
     
     if (theme === "default" || theme === "energy" || theme === "contrast") {
       ctx.lineWidth = cellsize*0.15;
@@ -314,7 +332,7 @@ function render(renderer, props = {}) {
     gl.uniform1f(renderer.camyloc, cameraY/height);
     
     gl.uniform1i(renderer.themeloc, ["nothing", "default", "energy", "contrast", "clan"].indexOf(theme));
-    gl.uniform1i(renderer.backthemeloc, ["nothing", "default", "poisons", "organic", "charge"].indexOf(backtheme));
+    gl.uniform1i(renderer.backthemeloc, ["nothing", "default", "poisons", "organic", "charge", "sum"].indexOf(backtheme));
     
     if (theme !== "nothing") {
       gl.bindTexture(gl.TEXTURE_2D, renderer.textureType);
@@ -508,6 +526,8 @@ void main() {
   const int maxCharge = ${consts.maxCharge};
   const int energyUnit = ${consts.energyUnit};
   
+  const int organicCost = ${consts.organicCost};
+  
   const vec4 bgColor = ${hexToVec4(style.background)};
   const vec4 woodColor = ${hexToVec4(style.woodColor)};
   const vec4 sproutColor = ${hexToVec4(style.sproutColor)};
@@ -575,6 +595,11 @@ void main() {
       fragcolor = vec4(1.-v, 1.-v, 1.-v, 1);
     }
   }
+  if (backtheme == 5) {
+    float v = (float(charge)+float(organic)*float(organicCost))/(float(maxCharge)+float(maxOrganic)*float(organicCost));
+    
+    fragcolor = vec4(1.-v, 1.-v, 1.-v, 1);
+  }
   
   if (theme == 1) {
     if (type == 1) fragcolor = woodColor;
@@ -615,17 +640,17 @@ void main() {
     webgl: interface.webgl,
     ctx: interface.ctx,
     
-    posloc: gl.getAttribLocation(program, 'vertexpos'),
-    textypeloc: gl.getUniformLocation(program, 'texture_types'),
-    texorganicloc: gl.getUniformLocation(program, 'texture_organic'),
-    texchargeloc: gl.getUniformLocation(program, 'texture_charge'),
-    texclanloc: gl.getUniformLocation(program, 'texture_clan'),
-    texenergyloc: gl.getUniformLocation(program, 'texture_energy'),
-    zoomloc: gl.getUniformLocation(program, 'zoom'),
-    camxloc: gl.getUniformLocation(program, 'camx'),
-    camyloc: gl.getUniformLocation(program, 'camy'),
-    themeloc: gl.getUniformLocation(program, 'theme'),
-    backthemeloc: gl.getUniformLocation(program, 'backtheme'),
+    posloc: gl.getAttribLocation(program, "vertexpos"),
+    textypeloc: gl.getUniformLocation(program, "texture_types"),
+    texorganicloc: gl.getUniformLocation(program, "texture_organic"),
+    texchargeloc: gl.getUniformLocation(program, "texture_charge"),
+    texclanloc: gl.getUniformLocation(program, "texture_clan"),
+    texenergyloc: gl.getUniformLocation(program, "texture_energy"),
+    zoomloc: gl.getUniformLocation(program, "zoom"),
+    camxloc: gl.getUniformLocation(program, "camx"),
+    camyloc: gl.getUniformLocation(program, "camy"),
+    themeloc: gl.getUniformLocation(program, "theme"),
+    backthemeloc: gl.getUniformLocation(program, "backtheme"),
     
     textureType: gl.createTexture(),
     textureOrganic: gl.createTexture(),

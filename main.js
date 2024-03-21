@@ -26,6 +26,9 @@ function getSimulationMethods(simulation) {
   
   const deathOnPotionDestroysIt = consts.deathOnPotionDestroysIt;
   
+  const width = simulation.width;
+  const height = simulation.height;
+  
   return {
     ...randomGenerater(simulation), // Методы рандома
     
@@ -50,7 +53,7 @@ function getSimulationMethods(simulation) {
     },
     
     putNewCell(type, x, y, changeuniq = true) {
-      const i = x+y*simulation.width;
+      const i = x+y*width;
       
       simulation.type[i] = type;
       
@@ -64,7 +67,7 @@ function getSimulationMethods(simulation) {
     putNewCellIndex(type, i, changeuniq = true) {
       simulation.type[i] = type;
       
-      return this.registerNewCell(i, type,changeuniq);
+      return this.registerNewCell(i, type, changeuniq);
     },
     
     deleteCell(i) {
@@ -110,23 +113,26 @@ function getSimulationMethods(simulation) {
     },
     
     posIndex(x, y) {
-      if (x < 0) x += simulation.width;
-      if (x >= simulation.width) x -= simulation.width;
-      if (y < 0) y += simulation.height;
-      if (y >= simulation.height) y -= simulation.height;
+      if (x < 0) x += width;
+      if (x >= width) x -= width;
+      if (y < 0) y += height;
+      if (y >= height) y -= height;
       
-      return x+y*simulation.width;
+      return x+y*width;
     },
     
     indexX(i) {
-      return i%simulation.width;
+      return i%width;
     },
     indexY(i) {
-      return Math.floor(i/simulation.width);
+      return Math.floor(i/width);
     },
     
     nearIndexByAngle(i, angle, distance = 1) {
-      return this.posIndex(this.indexX(i)+angleX[angle]*distance, this.indexY(i)+angleY[angle]*distance);
+      if (angle === 0) return i < width*distance ? i+width*(height-distance):i-width*distance;
+      if (angle === 1) return i%width >= width-distance ? i-(width-distance):i+distance;
+      if (angle === 2) return i >= width*(height-distance) ? i-width*(height-distance):i+width*distance;
+      if (angle === 3) return i%width < distance ? i+(width-distance):i-distance;
     },
     
     getSun(i) {
@@ -250,8 +256,10 @@ function iteration(simulation) {
   const sproutConsumption = consts.sproutConsumption;
   const sproutFallEnergy = consts.sproutFallEnergy;
   const sproutOrganicEat = consts.sproutOrganicEat;
+  const sproutOrganicEatSpeed = consts.sproutOrganicEatSpeed;
   const sproutEatEnergyPart = consts.sproutEatEnergyPart;
   const sproutDefaultProg = consts.sproutDefaultProg;
+  const sproutOnecellMax = consts.sproutOnecellMax;
   
   const sproutCommandsV2 = consts.sproutCommandsV2;
   const lookDistance = consts.lookDistance;
@@ -264,6 +272,7 @@ function iteration(simulation) {
   const seedShootBaseCost = consts.seedShootBaseCost;
   const seedShootDistanceCost = consts.seedShootDistanceCost;
   const seedShootCanKillNearby = consts.seedShootCanKillNearby;
+  const onlyManycellCanShoot = consts.onlyManycellCanShoot;
   
   const leafCost = consts.leafCost;
   const leafInitial = consts.leafInitial;
@@ -396,9 +405,10 @@ function iteration(simulation) {
     
     const isManycell = ptype[parenti] > 0 && pparentwooduniq[i] === puniq[parenti];
     
+    let genoffset = i*genomeLength+genomeWidth*pcurprog[i];
+    
     const getCommand = j => pgenome[
-      i*genomeLength+genomeWidth*pcurprog[i]+
-      (pcurrent[i]+j)%genomeWidth
+      genoffset+(pcurrent[i]+j)%genomeWidth
     ];
     
     let left = commandsPerStep;
@@ -611,7 +621,7 @@ function iteration(simulation) {
         
         const cost = seedShootBaseCost+distance*seedShootDistanceCost+energy;
         
-        if (penergy[i] < cost) change = getCommand(6);
+        if (penergy[i] < cost || (onlyManycellCanShoot && !isManycell)) change = getCommand(6);
         else {
           const angle = correctAngle(pangle[i]+getCommand(1));
           const k = methods.nearIndexByAngle(i, angle);
@@ -655,10 +665,12 @@ function iteration(simulation) {
         } else change = getCommand(2);
       }
       if (command === 7) { // Съесть органику
-        if (sorganic[i] > 0 && !isManycell) {
-          sorganic[i]--;
+        const canget = Math.min(sorganic[i], sproutOrganicEatSpeed);
+        
+        if (canget > 0 && !isManycell) {
+          sorganic[i] -= canget;
           
-          penergy[i] += sproutOrganicEat;
+          penergy[i] += canget*sproutOrganicEat;
           
           change = getCommand(1);
           
@@ -699,6 +711,8 @@ function iteration(simulation) {
         pcurprog[i] = getProg(1);
         pcurrent[i] = 0;
         
+        genoffset = i*genomeLength+genomeWidth*pcurprog[i];
+        
         change = 0;
       }
       if (command === 11) { // Многоклеточный ли я?
@@ -719,9 +733,7 @@ function iteration(simulation) {
       }
       if (command === 15) { // Посмотреть
         const angle = correctAngle(pangle[i]+getCommand(1));
-        const k = lookDistance > 1 ?
-          methods.nearIndexByAngle(i, angle, getCommand(8)):
-          methods.nearIndexByAngle(i, angle);
+        const k = methods.nearIndexByAngle(i, angle, getCommand(8)%lookDistance+1);
         
         if (ptype[k] > 0) {
           if (ptype[k] === 1) change = getCommand(3);
@@ -748,7 +760,7 @@ function iteration(simulation) {
         
         if (command === 18) { // Получение информации
           if (isManycell) {
-            if (pwoodinfo[parenti] === getCommand(1)) change = getCommand(2);
+            if (pwoodinfo[parenti] === (getCommand(1)%woodInfoTransfer)) change = getCommand(2);
             else change = getCommand(3);
           } else change = getCommand(4);
         }
@@ -807,6 +819,12 @@ function iteration(simulation) {
       pcurrent[i] = 0;
       
       pparentwooduniq[i] = 0;
+    }
+    
+    if (sproutOnecellMax && !isManycell && !growed && penergy[i] > sproutFallEnergy) {
+      methods.addResource(scharge, i, Math.floor((penergy[i]-sproutFallEnergy)/9));
+      
+      penergy[i] = sproutFallEnergy;
     }
   });
   
@@ -1110,8 +1128,10 @@ function getSimulationConsts(consts) {
     sproutConsumption: consts.sproutConsumption ?? 50,
     sproutFallEnergy: consts.sproutFallEnergy ?? 50000,
     sproutOrganicEat: consts.sproutOrganicEat ?? 100,
+    sproutOrganicEatSpeed: consts.sproutOrganicEatSpeed ?? 1,
     sproutEatEnergyPart: consts.sproutEatEnergyPart ?? 0,
     sproutDefaultProg: consts.sproutDefaultProg ?? 0,
+    sproutOnecellMax: consts.sproutOnecellMax ?? false,
     
     sproutCommandsV2: consts.sproutCommandsV2 ?? false,
     lookDistance: consts.lookDistance ?? 1,
@@ -1120,6 +1140,7 @@ function getSimulationConsts(consts) {
     seedConsumption: consts.seedConsumption ?? 5,
     seedFallEnergy: consts.seedFallEnergy ?? 20000,
     seedShootCanKillNearby: consts.seedShootCanKillNearby ?? false,
+    onlyManycellCanShoot: consts.onlyManycellCanShoot ?? false,
     
     seedShootDistance: consts.seedShootDistance ?? 20,
     seedShootBaseCost: consts.seedShootBaseCost ?? 3500,

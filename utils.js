@@ -344,6 +344,14 @@ function callFileSelector(f) {
   input.click();
 }
 
+function createArrayWithFn(length, fn) {
+  const res = [];
+  
+  for (let i = 0; i < length; i++) res[i] = fn(i);
+  
+  return res;
+}
+
 function getBinWriterMethods(arr) {
   const methods = {
     data: [],

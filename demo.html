@@ -52,7 +52,7 @@
   }
   
   const charge = 10000;
-  const organic = 50;
+  const organic = charge/simulation.consts.organicCost;
   
   for (let i = 0; i < simulation.organic.length; i++) simulation.organic[i] = organic;
   for (let i = 0; i < simulation.charge.length; i++) simulation.charge[i] = charge;

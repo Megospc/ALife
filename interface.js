@@ -8,6 +8,9 @@ function setupInterface(main, simulation, props = {}) {
     showCenter: false,
     changed: true,
     
+    frameopened: false,
+    populationopened: false,
+    
     selectType: "none",
     selectUniq: -1,
     selectIndex: -1,
@@ -67,8 +70,31 @@ function setupInterface(main, simulation, props = {}) {
   
   obj.topstats = new DivElement().to(obj.main);
   obj.frame = new StatElement(strings.iteration, 0).to(obj.topstats);
+  obj.openedframe = new DivElement("openeddiv").to(obj.topstats);
   obj.population = new StatElement(strings.population, 0).to(obj.topstats);
+  obj.openedpopulation = new DivElement("openeddiv").to(obj.topstats);
   obj.fps = new StatElement(strings.fps, 0).attr("onclick", props.changeFPS ?? (() => {})).to(obj.topstats);
+  
+  obj.frameYear = new StatElement(strings.frameYear).to(obj.openedframe);
+  obj.frameAge = new StatElement(strings.frameAge).to(obj.openedframe);
+  obj.frameEpoch = new StatElement(strings.frameEpoch).to(obj.openedframe);
+  obj.frame.attr("onclick", function() {
+    obj.frameopened = !obj.frameopened;
+  });
+  obj.openedframe.attr("onclick", function() {
+    obj.frameopened = !obj.frameopened;
+  });
+  
+  obj.populationtype = [];
+  
+  for (let i = 0; i < 8; i++) obj.populationtype[i] = new StatElement(strings.populationTypes[i]).to(obj.openedpopulation);
+  
+  obj.population.attr("onclick", function() {
+    obj.populationopened = !obj.populationopened;
+  });
+  obj.openedpopulation.attr("onclick", function() {
+    obj.populationopened = !obj.populationopened;
+  });
   
   obj.themes = new DivElement().to(obj.main);
   obj.theme = new SelectElement(strings.rendermodeHeader, [
@@ -83,7 +109,8 @@ function setupInterface(main, simulation, props = {}) {
     ["poisons", strings.groundmodeValues[1]],
     ["organic", strings.groundmodeValues[2]],
     ["charge", strings.groundmodeValues[3]],
-    ["nothing", strings.groundmodeValues[4]]
+    ["sum", strings.groundmodeValues[4]],
+    ["nothing", strings.groundmodeValues[5]]
   ], "default").attr("onchange", () => obj.changed = true).to(obj.themes);
   
   obj.canvasdiv = new DivElement().to(obj.main);
@@ -111,7 +138,7 @@ function setupInterface(main, simulation, props = {}) {
   
   obj.infobtns = new DivElement().to(obj.infodiv);
   obj.infocopy = new ButtonElement(strings.infoCopy, function() {
-    if (navigator.clipboard) navigator.clipboard.writeText(obj.info.value);
+    if (navigator.clipboard) navigator.clipboard.writeText(obj.info.attr("value"));
   }).to(obj.infobtns);
   obj.infohide = new ButtonElement(strings.infoHide, function() {
     obj.selectType = "none";
@@ -343,7 +370,7 @@ function setupInterface(main, simulation, props = {}) {
         const v = +e.code[5];
         
         if (seltheme && v < 5) obj.theme.value = ["nothing", "default", "energy", "contrast", "clan"][v];
-        if (selbacktheme && v < 5) obj.backtheme.value = ["nothing", "default", "poisons", "organic", "charge"][v];
+        if (selbacktheme && v < 6) obj.backtheme.value = ["nothing", "default", "poisons", "organic", "charge", "sum"][v];
         
         obj.changed = true;
       }
@@ -473,7 +500,7 @@ function setupSettings(main, props) {
     obj.recordon = new CheckInput(strings.recordOnHeader, false).to(obj.main);
     
     obj.recordinterval = new NumberInput(strings.recordIntervalHeader, 1, 500, 5, true).to(obj.main);
-    obj.recordmax = new NumberInput(strings.recordMaxsizeHeader, 1, 1000, 50, true).to(obj.main);
+    obj.recordmax = new NumberInput(strings.recordMaxsizeHeader, 1, 32000, 50, true).to(obj.main);
   }
   
   obj.buttons = new DivElement().to(obj.main);
@@ -557,6 +584,7 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
     }
     
     updateSelectInfo(interface);
+    updateOpenedStats(interface);
     
     const rendertime = performance.now()-renderstart;
     
@@ -591,6 +619,32 @@ function startWindow(startCallbacks, frameCallbacks, interface, simulation, rend
       lastTime = time;
     }
   }, 1000/fps);
+}
+
+function updateOpenedStats(interface) {
+  const simulation = interface.simulation;
+  
+  if (interface.frameopened) {
+    const frame = simulation.frame;
+    
+    interface.frameYear.value = Math.floor(frame/1e3);
+    interface.frameAge.value = Math.floor(frame/100e3)+1;
+    interface.frameEpoch.value = Math.floor(frame/1000e3)+1;
+    
+    interface.openedframe.show();
+  } else interface.openedframe.hide();
+  
+  if (interface.populationopened) {
+    const els = interface.populationtype;
+    
+    const pops = new Array(els.length).fill(0);
+    
+    for (let i = 0; i < simulation.type.length; i++) pops[simulation.type[i]]++;
+    
+    for (let i = 0; i < pops.length; i++) els[i].value = bigNumberString(pops[i]);
+    
+    interface.openedpopulation.show();
+  } else interface.openedpopulation.hide();
 }
 
 function updateSimulationEnergy(interface) {

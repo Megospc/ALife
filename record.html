@@ -124,6 +124,8 @@
             interface.clancountdiv.show();
           }
           
+          updateOpenedStats(interface);
+          
           const rendertime = performance.now()-renderstart;
           
           interface.frame.value = simulation.frame;

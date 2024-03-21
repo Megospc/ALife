@@ -1,3 +1,9 @@
+/* light theme */
+
+body {
+  background-color: #ffffff;
+  color: #000000;
+}
 h1, h2 , h3, input, label, button, p, select, a, b {
   font-family: Monospace, Sans-Serif;
 }
@@ -26,6 +32,9 @@ h1, h2 , h3, input, label, button, p, select, a, b {
 }
 .div {
   margin-bottom: 10px;
+}
+.openeddiv {
+  margin-left: 20px;
 }
 .headdiv {
   margin-bottom: 20px;
@@ -62,6 +71,8 @@ h1, h2 , h3, input, label, button, p, select, a, b {
   border-radius: 3px;
   padding-top: 1.5px;
   padding-bottom: 1.5px;
+  background-color: #f8f8f8;
+  color: #000000;
 }
 .input[type="checkbox"] {
   margin-right: 10px;
@@ -82,7 +93,7 @@ h1, h2 , h3, input, label, button, p, select, a, b {
   color: #ffffff;
   border-radius: 5px;
   border: none;
-  background: #4676d7;
+  background-color: #4676d7;
   min-width: 120px;
   font-size: 16px;
   padding: 3px;
@@ -92,7 +103,7 @@ h1, h2 , h3, input, label, button, p, select, a, b {
   color: #ffffff;
   border-radius: 3px;
   border: none;
-  background: #4676d7;
+  background-color: #4676d7;
   min-width: 75px;
   font-size: 14px;
   padding: 3px;
@@ -102,7 +113,7 @@ h1, h2 , h3, input, label, button, p, select, a, b {
   box-shadow: 0 0 0 4px #4676d740;
 }
 .button:hover, .minibtn:hover {
-  background: #1d49aa;
+  background-color: #1d49aa;
 }
 .select {
   min-width: 120px;
@@ -112,4 +123,33 @@ h1, h2 , h3, input, label, button, p, select, a, b {
   padding-top: 1.5px;
   padding-bottom: 1.5px;
   background-color: #f0f0f0;
+  color: #000000;
+}
+
+/* dark theme */
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #202020;
+    color: #c0c0c0;
+  }
+  .pagelink {
+    color: #8080f0;
+  }
+  .lang {
+    color: #5050a0;
+  }
+  .progressbar {
+    border-color: #606060;
+  }
+  .input[type="number"], .select, .textarea, .nameinput {
+    background-color: #404040;
+    color: #c0c0c0;
+  }
+  .button:focus, .minibtn:focus {
+    box-shadow: 0 0 0 4px #6696f740;
+  }
+  .button:hover, .minibtn:hover {
+    background-color: #6696f7;
+  }
 }
