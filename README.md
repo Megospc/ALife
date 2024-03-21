@@ -2,11 +2,11 @@
 
 **English 🇺🇸 | [Русский](README-RU.md) 🇷🇺**
 
-Artifical evolution made with JavaScript.
+Artifical life: simulation of evolution.
 
 Idea is taken from the project "The Battle Of Clans" by [Simulife Hub](https://youtube.com/@wallcraft-video).
 
-Version: 1.4.7 (13.03.2024)
+Version: 1.5.5 (21.03.2024)
 
 [**DEMOVERSION**](https://megospc.github.io/ALife/demo.html?lang=en)\
 [**FULL VERSION**](https://megospc.github.io/ALife/index.html?lang=en)
@@ -32,7 +32,7 @@ Version: 1.4.7 (13.03.2024)
 + It works on mobile devices.
 
 ## Description
-**ALife** is a simulator of evolution of multicellular organisms.
+**ALife** simulates evolution of multicellular organisms.
 
 ### Operating Principle
 The simulation field consists of many squares (a "*Tile*"). Each *tile* contains a some amount of resources: *organic* and *charge*. There may also be a living cell on the tile (a "*Cell*"). Each *cell* has its own energy reserve and consumes a little each turn. If there isn't enough energy, the cell dies. When a cell dies, *organic* and *charge* remain in the 3x3 **tiles** area (amount of charge = energy that was in the cell). If there is too much *organic* or *charge* in a tile, it becomes *poisoned*. The cell dies if its *tile* is *poisoned*.
@@ -43,7 +43,7 @@ Cells can be different types:
 + **Aerial**. Collects *charge*. Doesn't die on *energy poisoning*.
 + **Shoot**. Each shoot has its own *genome*. Following the commands of the *genome*, the shoot can create new *cells* around itself, turning into wood, eat any *cell* nearby (except wood), etc. The color of the shoot depends on the amount of energy it has (black - little, white - a lot). If the shoot accumulates 50K energy, it falls off the wood to which it is attached and become single-celled. A single-celled shoot can move around the field and eat organic.
 + **Wood**. Transports energy from producing cells to shoots.
-+ **Seed**. A dormant shoot. If the wood to which the seed is attached dies, the seed wakes up and turns into a shoot that will continue to follow the commands of the *genome*. Sometimes, before waking up, a seed shoots out and flies through some number of *tiles*. If the such a seed collides with another *cell*, both die. Also, the seed will fall off and wake up if it accumulates 20K energy.
++ **Seed**. A dormant shoot. If the wood to which the seed is attached dies, the seed wakes up and turns into a shoot that will continue to follow the commands of the *genome*. Sometimes, before waking up, a seed shoots out and flies through some number of *tiles*. If the such a seed collides with another *cell*, both die. Also, the seed will fall off and wake up if it accumulates 30K energy.
 
 <table>
   <thead>
