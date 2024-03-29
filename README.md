@@ -1,4 +1,4 @@
-<h1 align="center">🦠 Artifical Life (ALife) 🍀</h1>
+<h1 align="center">🦠 Artificial Life (ALife) 🍀</h1>
 
 **English 🇺🇸 | [Русский](README-RU.md) 🇷🇺**
 
