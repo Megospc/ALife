@@ -2,7 +2,7 @@
 
 **English 🇺🇸 | [Русский](README-RU.md) 🇷🇺**
 
-Artifical life: simulation of evolution.
+Artificial life: simulation of evolution.
 
 Idea is taken from the project "The Battle Of Clans" by [Simulife Hub](https://youtube.com/@wallcraft-video).
 
