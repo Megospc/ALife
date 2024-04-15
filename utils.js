@@ -1,69 +1,69 @@
 class Element {
-  constructor(v) {
-    if (typeof v == "string") this.element = document.getElementById(v);
-    else {
-      this.element = document.createElement(v.elementType);
-      
-      for (const key in v) if (key != "elementType") this.element[key] = v[key];
+    constructor(v) {
+        if (typeof v == "string") this.element = document.getElementById(v);
+        else {
+            this.element = document.createElement(v.elementType);
+            
+            for (const key in v) if (key != "elementType") this.element[key] = v[key];
+        }
     }
-  }
-  
-  attr(name, value) {
-    if (typeof value == "undefined") return this.element[name];
     
-    this.element[name] = value;
+    attr(name, value) {
+        if (typeof value == "undefined") return this.element[name];
+        
+        this.element[name] = value;
+        
+        return this;
+    }
     
-    return this;
-  }
-  
-  append(elem) {
-    const e = elem.element ?? elem;
+    append(elem) {
+        const e = elem.element ?? elem;
+        
+        this.element.appendChild(e);
+        
+        return this;
+    }
     
-    this.element.appendChild(e);
+    to(elem) {
+        const e = elem.element ?? elem;
+        
+        e.appendChild(this.element);
+        
+        return this;
+    }
     
-    return this;
-  }
-  
-  to(elem) {
-    const e = elem.element ?? elem;
+    event() {
+        this.element.addEventListener(...arguments);
+        
+        return this;
+    }
     
-    e.appendChild(this.element);
+    show(display = "block") {
+        this.element.style.display = display;
+        
+        return this;
+    }
+    hide() {
+        this.element.style.display = "none";
+        
+        return this;
+    }
     
-    return this;
-  }
-  
-  event() {
-    this.element.addEventListener(...arguments);
+    clientRect() {
+        return this.element.getBoundingClientRect();
+    }
     
-    return this;
-  }
-  
-  show(display = "block") {
-    this.element.style.display = display;
+    call(name, ...args) {
+        return this.element[name](...args);
+    }
     
-    return this;
-  }
-  hide() {
-    this.element.style.display = "none";
+    end() {
+        return this.element;
+    }
     
-    return this;
-  }
-  
-  clientRect() {
-    return this.element.getBoundingClientRect();
-  }
-  
-  call(name, ...args) {
-    return this.element[name](...args);
-  }
-  
-  end() {
-    return this.element;
-  }
-  
-  remove() {
-    this.element.remove();
-  }
+    remove() {
+        this.element.remove();
+    }
 }
 
 const kib = 1024;
@@ -74,394 +74,394 @@ const angleX = [ 0, 1, 0, -1 ];
 const angleY = [ -1, 0, 1, 0 ];
 
 function newCollection() {
-  return Object.create(null);
+    return Object.create(null);
 }
 
 function callNearby(f) {
-  f(-1, -1);
-  f(0, -1);
-  f(1, -1);
-  f(-1, 0);
-  f(0, 0);
-  f(1, 0);
-  f(-1, 1);
-  f(0, 1);
-  f(1, 1);
+    f(-1, -1);
+    f(0, -1);
+    f(1, -1);
+    f(-1, 0);
+    f(0, 0);
+    f(1, 0);
+    f(-1, 1);
+    f(0, 1);
+    f(1, 1);
 }
 
 function callAngles(f, zero) {
-  f(0, -1);
-  f(1, 0);
-  f(0, 1);
-  f(-1, 0);
-  
-  if (zero) f(0, 0);
+    f(0, -1);
+    f(1, 0);
+    f(0, 1);
+    f(-1, 0);
+    
+    if (zero) f(0, 0);
 }
 
 function correctAngle(angle) {
-  return (angle+4) & 0b11; // Не %, для оптимизации
+    return (angle+4) & 0b11; // Не %, для оптимизации
 }
 function inverseAngle(angle) {
-  return (angle+2) & 0b11;
+    return (angle+2) & 0b11;
 }
 
 function getWindowStrings(strings) {
-  const param = new URL(window.location.href).searchParams.get("lang");
-  
-  if (strings[param]) return {
-    strings: strings[param],
-    language: param
-  };
-  
-  for (let i = 0; i < navigator.languages.length; i++) {
-    const lang = navigator.languages[i].slice(0, 2);
+    const param = new URL(window.location.href).searchParams.get("lang");
     
-    if (strings[lang]) return {
-      strings: strings[lang],
-      language: lang
+    if (strings[param]) return {
+        strings: strings[param],
+        language: param
     };
-  }
-  
-  return {
-    strings: strings.en,
-    language: "en"
-  };
+    
+    for (let i = 0; i < navigator.languages.length; i++) {
+        const lang = navigator.languages[i].slice(0, 2);
+        
+        if (strings[lang]) return {
+            strings: strings[lang],
+            language: lang
+        };
+    }
+    
+    return {
+        strings: strings.en,
+        language: "en"
+    };
 }
 
 function normalizeNumber(n, min, max, def, round) {
-  n = +n;
-  
-  if (isNaN(n)) return def;
-  
-  if (round) n = Math.floor(n);
-  
-  return Math.min(Math.max(n, min), max);
+    n = +n;
+    
+    if (isNaN(n)) return def;
+    
+    if (round) n = Math.floor(n);
+    
+    return Math.min(Math.max(n, min), max);
 }
 
 function addNormalizer(el, ...args) {
-  el.onchange = function() {
-    this.value = normalizeNumber(this.value, ...args);
-  };
+    el.onchange = function() {
+        this.value = normalizeNumber(this.value, ...args);
+    };
 }
 
 function generateRandomSeed() {
-  return Math.floor(Math.random()*2147483646)+1;
+    return Math.floor(Math.random()*2147483646)+1;
 }
 
 function randomGenerater(simulation) {
-  return {
-    random() {
-      simulation.random = (simulation.random*16807)%2147483647;
-      
-      return (simulation.random-1)/2147483647;
-    },
-    
-    randomInt(max) {
-      return Math.floor(this.random()*max);
-    },
-    randomRange(min, max) {
-      return this.randomInt(max-min)+min;
-    },
-    chance(chance) {
-      return this.random() < chance;
-    }
-  };
+    return {
+        random() {
+            simulation.random = (simulation.random*16807)%2147483647;
+            
+            return (simulation.random-1)/2147483647;
+        },
+        
+        randomInt(max) {
+            return Math.floor(this.random()*max);
+        },
+        randomRange(min, max) {
+            return this.randomInt(max-min)+min;
+        },
+        chance(chance) {
+            return this.random() < chance;
+        }
+    };
 }
 
 function compileShader(gl, type, text) {
-  const res = gl.createShader(type);
-  
-  gl.shaderSource(res, text);
-  gl.compileShader(res);
-  
-  if (gl.getShaderParameter(res, gl.COMPILE_STATUS)) return res;
-  else {
-    const err = gl.getShaderInfoLog(res);
+    const res = gl.createShader(type);
     
-    gl.deleteShader(res);
+    gl.shaderSource(res, text);
+    gl.compileShader(res);
     
-    throw new Error(`can not create shader: ${err}`);
-  }
+    if (gl.getShaderParameter(res, gl.COMPILE_STATUS)) return res;
+    else {
+        const err = gl.getShaderInfoLog(res);
+        
+        gl.deleteShader(res);
+        
+        throw new Error(`can not create shader: ${err}`);
+    }
 }
 
 function createProgram(gl, v, f) {
-  const res = gl.createProgram();
-  
-  gl.attachShader(res, v);
-  gl.attachShader(res, f);
-  gl.linkProgram(res);
-  
-  return res;
+    const res = gl.createProgram();
+    
+    gl.attachShader(res, v);
+    gl.attachShader(res, f);
+    gl.linkProgram(res);
+    
+    return res;
 }
 
 function parseHexFragment(hex, i) {
-  return parseInt(hex[i]+hex[i+1], 16);
+    return parseInt(hex[i]+hex[i+1], 16);
 }
 
 function colorToHex(c) {
-  const x = Math.max(Math.min(Math.floor(c), 255), 0);
-  const s = x.toString(16);
-  
-  return x < 16 ? "0"+s:s;
+    const x = Math.max(Math.min(Math.floor(c), 255), 0);
+    const s = x.toString(16);
+    
+    return x < 16 ? "0"+s:s;
 }
 
 function rgbToHex(r, g, b) {
-  return "#"+colorToHex(r)+colorToHex(g)+colorToHex(b);
+    return "#"+colorToHex(r)+colorToHex(g)+colorToHex(b);
 }
 
 function hexToRgb(hex) {
-  return [
-    parseHexFragment(hex, 1),
-    parseHexFragment(hex, 3),
-    parseHexFragment(hex, 5)
-  ];
+    return [
+        parseHexFragment(hex, 1),
+        parseHexFragment(hex, 3),
+        parseHexFragment(hex, 5)
+    ];
 }
 
 function hexToVec4(hex) {
-  const color = hexToRgb(hex).map(x => x/255);
-  
-  return "vec4("+color.join(", ")+", 1)";
+    const color = hexToRgb(hex).map(x => x/255);
+    
+    return "vec4("+color.join(", ")+", 1)";
 }
 
 function hexGradient(hex1, hex2, i) {
-  i = Math.max(Math.min(i, 1), 0);
-  
-  const [r1, g1, b1] = hexToRgb(hex1);
-  const [r2, g2, b2] = hexToRgb(hex2);
-  
-  return rgbToHex(
-    (r2-r1)*i+r1,
-    (g2-g1)*i+g1,
-    (b2-b1)*i+b1,
-  );
+    i = Math.max(Math.min(i, 1), 0);
+    
+    const [r1, g1, b1] = hexToRgb(hex1);
+    const [r2, g2, b2] = hexToRgb(hex2);
+    
+    return rgbToHex(
+        (r2-r1)*i+r1,
+        (g2-g1)*i+g1,
+        (b2-b1)*i+b1,
+    );
 }
 
 function hueToRgb(h) {
-  h %= 1;
-  h *= 8;
-  
-  const v = h%1;
-  
-  const c = Math.floor(h);
-  
-  if (c === 0) return [1, v/2, 0];
-  if (c === 1) return [1, 0.5+v/2, 0];
-  if (c === 2) return [1-v, 1, 0];
-  if (c === 3) return [0, 1, v];
-  if (c === 4) return [0, 1-v, 1];
-  if (c === 5) return [v, 0, 1];
-  if (c === 6) return [1, 0, 1-v/2];
-  if (c === 7) return [1, 0, 0.5-v/2];
+    h %= 1;
+    h *= 8;
+    
+    const v = h%1;
+    
+    const c = Math.floor(h);
+    
+    if (c === 0) return [1, v/2, 0];
+    if (c === 1) return [1, 0.5+v/2, 0];
+    if (c === 2) return [1-v, 1, 0];
+    if (c === 3) return [0, 1, v];
+    if (c === 4) return [0, 1-v, 1];
+    if (c === 5) return [v, 0, 1];
+    if (c === 6) return [1, 0, 1-v/2];
+    if (c === 7) return [1, 0, 0.5-v/2];
 }
 
 function fixedString(str, length) {
-  while (str.length < length) str += " ";
-  
-  return str;
+    while (str.length < length) str += " ";
+    
+    return str;
 }
 
 function bigNumberString(n, names) {
-  if (n === 0) return "0";
-  if (n < 0) return "-"+bigNumberString(-n);
-  
-  const log = Math.floor(Math.log10(n)/3);
-  
-  names ??= ["", "K", "M", "B", "T", "Q"];
-  
-  return (n/(1000**log)).toFixed(log ? 2:0)+names[log];
+    if (n === 0) return "0";
+    if (n < 0) return "-"+bigNumberString(-n);
+    
+    const log = Math.floor(Math.log10(n)/3);
+    
+    names ??= ["", "K", "M", "B", "T", "Q"];
+    
+    return (n/(1000**log)).toFixed(log ? 2:0)+names[log];
 }
 
 function filesizeString(size) {
-  const log = Math.floor(Math.log2(size)/10);
-  
-  const names = ["B", "KiB", "MiB", "GiB", "TiB"];
-  
-  return (size/(1024**log)).toFixed(log ? 1:0)+names[log];
+    const log = Math.floor(Math.log2(size)/10);
+    
+    const names = ["B", "KiB", "MiB", "GiB", "TiB"];
+    
+    return (size/(1024**log)).toFixed(log ? 1:0)+names[log];
 }
 
 function performanceString(cells, time) {
-  time = Math.max(time, 0.1);
-  
-  return bigNumberString(cells/(time/1000), ["cps", "kps", "mps", "gps", "tps"]);
+    time = Math.max(time, 0.1);
+    
+    return bigNumberString(cells/(time/1000), ["cps", "kps", "mps", "gps", "tps"]);
 }
 
 function download(src, name) {
-  const a = document.createElement("a");
-  
-  a.href = src;
-  a.download = name;
-  
-  a.click();
+    const a = document.createElement("a");
+    
+    a.href = src;
+    a.download = name;
+    
+    a.click();
 }
 function downloadBlob(blob, name) {
-  download(URL.createObjectURL(blob), name);
+    download(URL.createObjectURL(blob), name);
 }
 function downloadText(text, name) {
-  const blob = new Blob([text], {
-    type: "text/plain"
-  });
-  
-  downloadBlob(blob, name);
+    const blob = new Blob([text], {
+        type: "text/plain"
+    });
+    
+    downloadBlob(blob, name);
 }
 
 function encodeText(text) {
-  const encoder = new TextEncoder();
-  
-  return encoder.encode(text);
+    const encoder = new TextEncoder();
+    
+    return encoder.encode(text);
 }
 
 function decodeText(data) {
-  const encoder = new TextDecoder();
-  
-  return encoder.decode(data);
+    const encoder = new TextDecoder();
+    
+    return encoder.decode(data);
 }
 
 function readFileAsText(file, ok, err) {
-  const reader = new FileReader();
-  
-  reader.readAsText(file);
-  
-  reader.onload = () => ok(reader.result);
-  reader.onerror = () => err();
+    const reader = new FileReader();
+    
+    reader.readAsText(file);
+    
+    reader.onload = () => ok(reader.result);
+    reader.onerror = () => err();
 }
 
 function readFileAsBuffer(file, ok, err) {
-  const reader = new FileReader();
-  
-  reader.readAsArrayBuffer(file);
-  
-  reader.onload = () => ok(reader.result);
-  reader.onerror = () => err();
+    const reader = new FileReader();
+    
+    reader.readAsArrayBuffer(file);
+    
+    reader.onload = () => ok(reader.result);
+    reader.onerror = () => err();
 }
 
 function callFileSelector(f) {
-  const input = document.createElement("input");
-  
-  input.type = "file";
-  
-  input.onchange = () => f(input.files[0]);
-  
-  input.click();
+    const input = document.createElement("input");
+    
+    input.type = "file";
+    
+    input.onchange = () => f(input.files[0]);
+    
+    input.click();
 }
 
 function createArrayWithFn(length, fn) {
-  const res = [];
-  
-  for (let i = 0; i < length; i++) res[i] = fn(i);
-  
-  return res;
+    const res = [];
+    
+    for (let i = 0; i < length; i++) res[i] = fn(i);
+    
+    return res;
 }
 
 function getBinWriterMethods(arr) {
-  const methods = {
-    data: [],
-    
-    curindex: 0,
-    
-    write8(v) {
-      this.data[this.curindex++] = v & 0xFF;
-    },
-    write16(v) {
-      this.write8(v >> 8);
-      this.write8(v);
-    },
-    write32(v) {
-      this.write16(v >> 16);
-      this.write16(v);
-    },
-    
-    compress() {
-      const buf = new Uint8Array(this.data);
-      
-      arr.push(buf);
-      
-      this.data = [];
-      
-      this.curindex = 0;
-      
-      return buf;
-    }
-  };
-  
-  methods.createBitbuf = function(len) {
-    return {
-      data: len ? new Uint8Array(len):[],
-      
-      curoffset: 0,
-      curindex: -1,
-      
-      writeBit(bit) {
-        if (this.curoffset === 0) this.data[++this.curindex] = 0;
+    const methods = {
+        data: [],
         
-        if (bit === 1) this.data[this.curindex] |= 1 << this.curoffset;
+        curindex: 0,
         
-        this.curoffset = (this.curoffset+1) & 7;
-      },
-      
-      write(v, len) {
-        for (let i = 0; i < len; i++) this.writeBit((v >> i) & 1);
-      },
-      
-      end() {
-        for (let i = 0; i < this.data.length; i++) methods.write8(this.data[i]);
-      }
+        write8(v) {
+            this.data[this.curindex++] = v & 0xFF;
+        },
+        write16(v) {
+            this.write8(v >> 8);
+            this.write8(v);
+        },
+        write32(v) {
+            this.write16(v >> 16);
+            this.write16(v);
+        },
+        
+        compress() {
+            const buf = new Uint8Array(this.data);
+            
+            arr.push(buf);
+            
+            this.data = [];
+            
+            this.curindex = 0;
+            
+            return buf;
+        }
     };
-  };
-  
-  return methods;
+    
+    methods.createBitbuf = function(len) {
+        return {
+            data: len ? new Uint8Array(len):[],
+            
+            curoffset: 0,
+            curindex: -1,
+            
+            writeBit(bit) {
+                if (this.curoffset === 0) this.data[++this.curindex] = 0;
+                
+                if (bit === 1) this.data[this.curindex] |= 1 << this.curoffset;
+                
+                this.curoffset = (this.curoffset+1) & 7;
+            },
+            
+            write(v, len) {
+                for (let i = 0; i < len; i++) this.writeBit((v >> i) & 1);
+            },
+            
+            end() {
+                for (let i = 0; i < this.data.length; i++) methods.write8(this.data[i]);
+            }
+        };
+    };
+    
+    return methods;
 }
 
 function getBinReaderMethods(arr) {
-  const methods = {
-    index: 0,
-    
-    read8() {
-      return arr[this.index++];
-    },
-    read16() {
-      return (this.read8() << 8) + this.read8();
-    },
-    read32() {
-      return (this.read16() << 16) + this.read16();
-    },
-    
-    cursor(index) {
-      this.index = index;
-    },
-    
-    get isEnd() {
-      return this.index >= arr.length-1;
-    }
-  };
-  
-  methods.createBitbuf = function() {
-    return {
-      curoffset: 0,
-      curvalue: 0,
-      
-      readBit() {
-        if (this.curoffset === 0) this.curvalue = methods.read8();
+    const methods = {
+        index: 0,
         
-        const v = (this.curvalue >> this.curoffset) & 1;
+        read8() {
+            return arr[this.index++];
+        },
+        read16() {
+            return (this.read8() << 8) + this.read8();
+        },
+        read32() {
+            return (this.read16() << 16) + this.read16();
+        },
         
-        this.curoffset = (this.curoffset+1) & 7;
+        cursor(index) {
+            this.index = index;
+        },
         
-        return v;
-      },
-      
-      read(len) {
-        let v = 0;
-        
-        let i = 0;
-        
-        for (let i = 0; i < len; i++) v += this.readBit() << i;
-        
-        return v;
-      }
+        get isEnd() {
+            return this.index >= arr.length-1;
+        }
     };
-  };
-  
-  return methods;
+    
+    methods.createBitbuf = function() {
+        return {
+            curoffset: 0,
+            curvalue: 0,
+            
+            readBit() {
+                if (this.curoffset === 0) this.curvalue = methods.read8();
+                
+                const v = (this.curvalue >> this.curoffset) & 1;
+                
+                this.curoffset = (this.curoffset+1) & 7;
+                
+                return v;
+            },
+            
+            read(len) {
+                let v = 0;
+                
+                let i = 0;
+                
+                for (let i = 0; i < len; i++) v += this.readBit() << i;
+                
+                return v;
+            }
+        };
+    };
+    
+    return methods;
 }
 
 const benchmarkOn = false;
@@ -470,238 +470,238 @@ var benchmarkName;
 var benchmarkStarted;
 
 function startBenchmark(name) {
-  if (benchmarkOn) benchmarkStarted = performance.now();
-  
-  benchmarkName = name;
+    if (benchmarkOn) benchmarkStarted = performance.now();
+    
+    benchmarkName = name;
 }
 
 function closeBenchmark() {
-  if (benchmarkOn) {
-    const time = performance.now()-benchmarkStarted;
-    
-    console.log(fixedString(benchmarkName, 20)+": "+time.toFixed(2)+"ms");
-  }
+    if (benchmarkOn) {
+        const time = performance.now()-benchmarkStarted;
+        
+        console.log(fixedString(benchmarkName, 20)+": "+time.toFixed(2)+"ms");
+    }
 }
 
 function clearBenchmark() {
-  if (benchmarkOn) console.clear();
+    if (benchmarkOn) console.clear();
 }
 
 class ProgressBar extends Element {
-  constructor() {
-    super({
-      elementType: "canvas",
-      className: "progressbar",
-      
-      width: 600,
-      height: 30
-    });
-    
-    this.ctx = this.element.getContext("2d");
-    
-    this.anim = 0;
-  }
-  
-  draw(value) {
-    const ctx = this.ctx;
-    
-    const gradLine = ctx.createLinearGradient(0, 0, 0, 30);
-    gradLine.addColorStop(0, "#1010b0");
-    gradLine.addColorStop(1, "#0000a0");
-    
-    ctx.fillStyle = gradLine;
-    ctx.fillRect(0, 0, 600, 30);
-    
-    const x = Math.floor(value*600);
-    
-    const gradAnim = ctx.createLinearGradient(0, 0, 0, 30);
-    gradAnim.addColorStop(0, "#4040d0");
-    gradAnim.addColorStop(1, "#2020b0");
-    
-    ctx.fillStyle = gradAnim;
-    
-    ctx.beginPath();
-    
-    for (let cx = -this.anim; cx <= x; cx += 20) {
-      ctx.moveTo(cx, 0);
-      ctx.lineTo(cx+10, 0);
-      ctx.lineTo(cx+20, 30);
-      ctx.lineTo(cx+10, 30);
+    constructor() {
+        super({
+            elementType: "canvas",
+            className: "progressbar",
+            
+            width: 600,
+            height: 30
+        });
+        
+        this.ctx = this.element.getContext("2d");
+        
+        this.anim = 0;
     }
     
-    this.anim = (this.anim+1)%20;
-    
-    ctx.fill();
-    
-    const gradBack = ctx.createLinearGradient(0, 0, 0, 30);
-    gradBack.addColorStop(0, "#c0c0c0");
-    gradBack.addColorStop(1, "#a0a0a0");
-    
-    ctx.fillStyle = gradBack;
-    ctx.fillRect(600, 0, x-600, 30);
-    
-    ctx.fillStyle = "#ffffff";
-    ctx.shadowColor = "#ffffff";
-    
-    ctx.shadowBlur = 5;
-    
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = "24px Monospace";
-    
-    ctx.fillText(Math.floor(value*100)+"%", x/2, 17);
-    
-    ctx.shadowBlur = 0;
-  }
+    draw(value) {
+        const ctx = this.ctx;
+        
+        const gradLine = ctx.createLinearGradient(0, 0, 0, 30);
+        gradLine.addColorStop(0, "#1010b0");
+        gradLine.addColorStop(1, "#0000a0");
+        
+        ctx.fillStyle = gradLine;
+        ctx.fillRect(0, 0, 600, 30);
+        
+        const x = Math.floor(value*600);
+        
+        const gradAnim = ctx.createLinearGradient(0, 0, 0, 30);
+        gradAnim.addColorStop(0, "#4040d0");
+        gradAnim.addColorStop(1, "#2020b0");
+        
+        ctx.fillStyle = gradAnim;
+        
+        ctx.beginPath();
+        
+        for (let cx = -this.anim; cx <= x; cx += 20) {
+            ctx.moveTo(cx, 0);
+            ctx.lineTo(cx+10, 0);
+            ctx.lineTo(cx+20, 30);
+            ctx.lineTo(cx+10, 30);
+        }
+        
+        this.anim = (this.anim+1)%20;
+        
+        ctx.fill();
+        
+        const gradBack = ctx.createLinearGradient(0, 0, 0, 30);
+        gradBack.addColorStop(0, "#c0c0c0");
+        gradBack.addColorStop(1, "#a0a0a0");
+        
+        ctx.fillStyle = gradBack;
+        ctx.fillRect(600, 0, x-600, 30);
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "#ffffff";
+        
+        ctx.shadowBlur = 5;
+        
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "24px Monospace";
+        
+        ctx.fillText(Math.floor(value*100)+"%", x/2, 17);
+        
+        ctx.shadowBlur = 0;
+    }
 }
 
 class InputElement extends Element {
-  constructor(type, name) {
-    super({
-      elementType: "div",
-      className: "div"
-    });
+    constructor(type, name) {
+        super({
+            elementType: "div",
+            className: "div"
+        });
+        
+        this.label = new Element({
+            elementType: "label",
+            className: "label",
+            textContent: name+": "
+        }).to(this.element).end();
+        
+        this.input = new Element({
+            elementType: "input",
+            className: "input",
+            type
+        }).to(this.element).end();
+    }
     
-    this.label = new Element({
-      elementType: "label",
-      className: "label",
-      textContent: name+": "
-    }).to(this.element).end();
-    
-    this.input = new Element({
-      elementType: "input",
-      className: "input",
-      type
-    }).to(this.element).end();
-  }
-  
-  get value() {
-    return +this.input.value;
-  }
-  set value(v) {
-    this.input.value = v;
-  }
+    get value() {
+        return +this.input.value;
+    }
+    set value(v) {
+        this.input.value = v;
+    }
 }
 
 class CheckInput extends Element {
-  constructor(name, def) {
-    super({
-      elementType: "div",
-      className: "div"
-    });
+    constructor(name, def) {
+        super({
+            elementType: "div",
+            className: "div"
+        });
+        
+        this.input = new Element({
+            elementType: "input",
+            className: "input",
+            type: "checkbox"
+        }).to(this.element).end();
+        
+        this.label = new Element({
+            elementType: "label",
+            className: "label",
+            textContent: name,
+            onclick: () => this.input.click()
+        }).to(this.element).end();
+        
+        this.value = def;
+    }
     
-    this.input = new Element({
-      elementType: "input",
-      className: "input",
-      type: "checkbox"
-    }).to(this.element).end();
-    
-    this.label = new Element({
-      elementType: "label",
-      className: "label",
-      textContent: name,
-      onclick: () => this.input.click()
-    }).to(this.element).end();
-    
-    this.value = def;
-  }
-  
-  get value() {
-    return this.input.checked;
-  }
-  set value(v) {
-    this.input.checked = v;
-  }
+    get value() {
+        return this.input.checked;
+    }
+    set value(v) {
+        this.input.checked = v;
+    }
 }
 
 class SelectElement extends Element {
-  constructor(name, cases, def) {
-    super({
-      elementType: "div",
-      className: "div"
-    });
+    constructor(name, cases, def) {
+        super({
+            elementType: "div",
+            className: "div"
+        });
+        
+        this.label = new Element({
+            elementType: "label",
+            className: "label",
+            textContent: name+": "
+        }).to(this.element).end();
+        
+        this.select = new Element({
+            elementType: "select",
+            className: "select",
+            innerHTML: cases.map(x => `<option value="${x[0]}">${x[1]}</option>`).join("\n")
+        }).to(this.element).end();
+        
+        this.value = def;
+    }
     
-    this.label = new Element({
-      elementType: "label",
-      className: "label",
-      textContent: name+": "
-    }).to(this.element).end();
-    
-    this.select = new Element({
-      elementType: "select",
-      className: "select",
-      innerHTML: cases.map(x => `<option value="${x[0]}">${x[1]}</option>`).join("\n")
-    }).to(this.element).end();
-    
-    this.value = def;
-  }
-  
-  get value() {
-    return this.select.value;
-  }
-  set value(v) {
-    this.select.value = v;
-  }
+    get value() {
+        return this.select.value;
+    }
+    set value(v) {
+        this.select.value = v;
+    }
 }
 
 
 class NumberInput extends InputElement {
-  constructor(name, min, max, def, round) {
-    super("number", name);
-    
-    addNormalizer(this.input, min, max, def, round);
-    
-    this.value = def;
-  }
+    constructor(name, min, max, def, round) {
+        super("number", name);
+        
+        addNormalizer(this.input, min, max, def, round);
+        
+        this.value = def;
+    }
 }
 
 class RangeInput extends InputElement {
-  constructor(name, min, max, def) {
-    super("range", name);
-    
-    this.input.min = min;
-    this.input.max = max;
-    
-    this.value = def;
-  }
+    constructor(name, min, max, def) {
+        super("range", name);
+        
+        this.input.min = min;
+        this.input.max = max;
+        
+        this.value = def;
+    }
 }
 
 class StatElement extends Element {
-  constructor(name, def, pfix = "") {
-    super({
-      elementType: "p",
-      className: "stat",
-      textContent: name+": "+def
-    });
+    constructor(name, def, pfix = "") {
+        super({
+            elementType: "p",
+            className: "stat",
+            textContent: name+": "+def
+        });
+        
+        this.name = name;
+        this.pfix = pfix;
+    }
     
-    this.name = name;
-    this.pfix = pfix;
-  }
-  
-  set value(v) {
-    this.element.textContent = this.name+": "+v+this.pfix;
-  }
+    set value(v) {
+        this.element.textContent = this.name+": "+v+this.pfix;
+    }
 }
 
 class ButtonElement extends Element {
-  constructor(name, onclick, className = "button") {
-    super({
-      elementType: "button",
-      textContent: name,
-      className
-    });
-    
-    this.onclick = onclick;
-    
-    this.element.onclick = () => this.onclick();
-  }
+    constructor(name, onclick, className = "button") {
+        super({
+            elementType: "button",
+            textContent: name,
+            className
+        });
+        
+        this.onclick = onclick;
+        
+        this.element.onclick = () => this.onclick();
+    }
 }
 
 class DivElement extends Element {
-  constructor(className = "div") {
-    super({
-      elementType: "div",
-      className
-    });
-  }
+    constructor(className = "div") {
+        super({
+            elementType: "div",
+            className
+        });
+    }
 }

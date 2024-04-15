@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>ALife</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>ALife</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="assets/icon.svg">
 </head>
 <body>
-  <div class="headdiv">
-    <h1 id="header" class="header"></h1>
-    <a id="mainpage" class="pagelink"></a>
-  </div>
-  <div id="select"></div>
-  <div id="main"></div>
+    <div class="headdiv">
+        <h1 id="header" class="header"></h1>
+        <a id="mainpage" class="pagelink"></a>
+    </div>
+    <div id="select"></div>
+    <div id="main"></div>
 </body>
 </html>
 <script src="strings.js"></script>
@@ -22,133 +23,133 @@
 <script src="render.js"></script>
 <script src="reader.js"></script>
 <script>
-  const { language, strings } = getWindowStrings(languagesStrings);
-  
-  const select = new Element("select");
-  const main = new Element("main").hide();
-  
-  new Element("header").attr("textContent", strings.recordHeader);
-  new Element("mainpage")
-    .attr("textContent", strings.toMainpage)
-    .attr("href", "index.html?lang="+language);
-  
-  new ButtonElement(strings.setupSelect, () => callFileSelector(parse)).to(select);
-  
-  setupLanguageChanger(new DivElement().to(select), strings, language);
-  
-  const progdiv = new DivElement().to(document.body).hide();
-  
-  const proglabel = new Element({
-    elementType: "p",
-    className: "label"
-  }).to(progdiv);
-  
-  const progress = new ProgressBar().to(progdiv);
-  
-  var obj, settings, simulation, interface, interval;
-  
-  function parse(file) {
-    readFileAsBuffer(file, function(buffer) {
-      const u8 = new Uint8Array(buffer);
-      
-      proglabel.attr("textContent", strings.recordOpening);
-      
-      progdiv.show();
-      
-      select.hide();
-      
-      createReader(u8, progress, function(reader) {
-        progdiv.hide();
-        
-        const simulation = reader.simulation;
-        
-        const targetsize = 
-          simulation.width == 800 ? 1600:
-          simulation.width == 1800 ? 1800:1200;
-        
-        interface = setupInterface("main", simulation, {
-          strings,
-          language,
-          targetsize,
-          
-          worldenergy: false,
-          
-          framereset: function() {
-            reader.reset();
+    const { language, strings } = getWindowStrings(languagesStrings);
+    
+    const select = new Element("select");
+    const main = new Element("main").hide();
+    
+    new Element("header").attr("textContent", strings.recordHeader);
+    new Element("mainpage")
+        .attr("textContent", strings.toMainpage)
+        .attr("href", "index.html?lang="+language);
+    
+    new ButtonElement(strings.setupSelect, () => callFileSelector(parse)).to(select);
+    
+    setupLanguageChanger(new DivElement().to(select), strings, language);
+    
+    const progdiv = new DivElement().to(document.body).hide();
+    
+    const proglabel = new Element({
+        elementType: "p",
+        className: "label"
+    }).to(progdiv);
+    
+    const progress = new ProgressBar().to(progdiv);
+    
+    var obj, settings, simulation, interface, interval;
+    
+    function parse(file) {
+        readFileAsBuffer(file, function(buffer) {
+            const u8 = new Uint8Array(buffer);
             
-            readFrame(reader);
-          }
-        });
-        
-        renderer = createRenderer(interface, simulation, style);
-        
-        let lastTime = performance.now();
-        let lastRenderedFrame = -1;
-        let lastRenderedZoom = -1;
-        let lastHandleFrame = 0;
-        let frame = 0;
-        
-        setInterval(() => {
-          const handlestart = performance.now();
-          
-          if (!reader.isEnd() && !interface.paused && (frame-lastHandleFrame) >= (20-interface.speed.value)) {
-            readFrame(reader);
+            proglabel.attr("textContent", strings.recordOpening);
             
-            lastHandleFrame = frame;
-          }
-          
-          const handletime = performance.now()-handlestart;
-          
-          const renderstart = performance.now();
-          
-          if (interface.renderoff.value) {
-            interface.canvasdiv.hide();
-            interface.clancountdiv.hide();
-          } else {
-            const zoom = interface.getZoom();
+            progdiv.show();
             
-            if (interface.changed || lastRenderedFrame !== simulation.frame || lastRenderedZoom !== zoom) {
-              render(renderer, {
-                nopictures: true
-              });
-              
-              lastRenderedFrame = simulation.frame;
-              lastRenderedZoom = zoom;
-              
-              interface.changed = false;
-            }
+            select.hide();
             
-            interface.clancount.value = reader.clancount;
-            
-            interface.canvasdiv.show();
-            interface.clancountdiv.show();
-          }
-          
-          updateOpenedStats(interface);
-          
-          const rendertime = performance.now()-renderstart;
-          
-          interface.frame.value = simulation.frame;
-          interface.population.value = simulation.population;
-          
-          interface.handletime.value = Math.floor(handletime);
-          interface.rendertime.value = Math.floor(rendertime);
-          
-          interface.performance.value = performanceString(simulation.width*simulation.height, handletime);
-          
-          frame++;
-          
-          if (frame%10 === 0) {
-            const time = performance.now();
-            
-            interface.fps.value = (1000/(time-lastTime)*10).toFixed(1);
-            
-            lastTime = time;
-          }
-        }, 25);
-        
-        main.show();
-      });
-    }, () => alert(strings.readFileFailed));
-  }
+            createReader(u8, progress, function(reader) {
+                progdiv.hide();
+                
+                const simulation = reader.simulation;
+                
+                const targetsize = 
+                    simulation.width == 800 ? 1600:
+                    simulation.width == 1800 ? 1800:1200;
+                
+                interface = setupInterface("main", simulation, {
+                    strings,
+                    language,
+                    targetsize,
+                    
+                    worldenergy: false,
+                    
+                    framereset: function() {
+                        reader.reset();
+                        
+                        readFrame(reader);
+                    }
+                });
+                
+                renderer = createRenderer(interface, simulation, style);
+                
+                let lastTime = performance.now();
+                let lastRenderedFrame = -1;
+                let lastRenderedZoom = -1;
+                let lastHandleFrame = 0;
+                let frame = 0;
+                
+                setInterval(() => {
+                    const handlestart = performance.now();
+                    
+                    if (!reader.isEnd() && !interface.paused && (frame-lastHandleFrame) >= (20-interface.speed.value)) {
+                        readFrame(reader);
+                        
+                        lastHandleFrame = frame;
+                    }
+                    
+                    const handletime = performance.now()-handlestart;
+                    
+                    const renderstart = performance.now();
+                    
+                    if (interface.renderoff.value) {
+                        interface.canvasdiv.hide();
+                        interface.clancountdiv.hide();
+                    } else {
+                        const zoom = interface.getZoom();
+                        
+                        if (interface.changed || lastRenderedFrame !== simulation.frame || lastRenderedZoom !== zoom) {
+                            render(renderer, {
+                                nopictures: true
+                            });
+                            
+                            lastRenderedFrame = simulation.frame;
+                            lastRenderedZoom = zoom;
+                            
+                            interface.changed = false;
+                        }
+                        
+                        interface.clancount.value = reader.clancount;
+                        
+                        interface.canvasdiv.show();
+                        interface.clancountdiv.show();
+                    }
+                    
+                    updateOpenedStats(interface);
+                    
+                    const rendertime = performance.now()-renderstart;
+                    
+                    interface.frame.value = simulation.frame;
+                    interface.population.value = simulation.population;
+                    
+                    interface.handletime.value = Math.floor(handletime);
+                    interface.rendertime.value = Math.floor(rendertime);
+                    
+                    interface.performance.value = performanceString(simulation.width*simulation.height, handletime);
+                    
+                    frame++;
+                    
+                    if (frame%10 === 0) {
+                        const time = performance.now();
+                        
+                        interface.fps.value = (1000/(time-lastTime)*10).toFixed(1);
+                        
+                        lastTime = time;
+                    }
+                }, 25);
+                
+                main.show();
+            });
+        }, () => alert(strings.readFileFailed));
+    }
 </script>

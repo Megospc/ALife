@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>ALife</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>ALife</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="assets/icon.svg">
 </head>
 <body>
-  <div class="headdiv">
-    <h1 id="header" class="header"></h1>
-    <a id="mainpage" class="pagelink"></a>
-  </div>
-  <div id="select"></div>
-  <div id="edit"></div>
-  <div id="setup"></div>
-  <div id="main"></div>
+    <div class="headdiv">
+        <h1 id="header" class="header"></h1>
+        <a id="mainpage" class="pagelink"></a>
+    </div>
+    <div id="select"></div>
+    <div id="edit"></div>
+    <div id="setup"></div>
+    <div id="main"></div>
 </body>
 </html>
 <script src="strings.js"></script>
@@ -23,219 +24,219 @@
 <script src="main.js"></script>
 <script src="render.js"></script>
 <script>
-  const { language, strings } = getWindowStrings(languagesStrings);
-  
-  const select = new Element("select");
-  const edit = new Element("edit").hide();
-  const main = new Element("main").hide();
-  const setup = new Element("setup").hide();
-  
-  new Element("header").attr("textContent", strings.sandboxHeader);
-  new Element("mainpage")
-    .attr("textContent", strings.toMainpage)
-    .attr("href", "index.html?lang="+language);
-  
-  new ButtonElement(strings.setupSelect, () => callFileSelector(parse)).to(select);
-  
-  new Element({
-    elementType: "label",
-    textContent: strings.sandboxName+":"
-  }).to(edit);
-  
-  const nameelem = new Element({
-    elementType: "input",
-    type: "text",
-    className: "nameinput",
+    const { language, strings } = getWindowStrings(languagesStrings);
     
-    onchange: function() {
-      obj.name = this.value;
-    }
-  }).to(new DivElement().to(edit));
-  
-  new Element({
-    elementType: "label",
-    textContent: strings.sandboxDescription+":"
-  }).to(edit);
-  
-  const descrelem = new Element({
-    elementType: "textarea",
-    className: "textarea",
+    const select = new Element("select");
+    const edit = new Element("edit").hide();
+    const main = new Element("main").hide();
+    const setup = new Element("setup").hide();
     
-    onchange: function() {
-      obj.description = this.value;
-    }
-  }).to(new DivElement().to(edit));
-  
-  new ButtonElement(strings.setupDownload, () => downloadText(getJSON(), (obj.name ? obj.name:"unnamed")+".alife-species")).to(new DivElement().to(edit));
-  
-  const progressdiv = new DivElement().hide().to(document.body);
-  
-  new Element({
-    elementType: "p",
-    className: "label",
-    textContent: strings.setupCreating
-  }).to(progressdiv);
-  
-  const progress = new ProgressBar().to(progressdiv);
-  
-  setupLanguageChanger(new DivElement().to(select), strings, language);
-  
-  var obj, settings, simulation, interface, interval;
-  
-  function getJSON() {
-    obj.settings = {
-      sun: +settings.sun.value,
-      resources: +settings.resources.value,
-      prog: +settings.prog.value,
-      density: +settings.density.value
-    };
+    new Element("header").attr("textContent", strings.sandboxHeader);
+    new Element("mainpage")
+        .attr("textContent", strings.toMainpage)
+        .attr("href", "index.html?lang="+language);
     
-    obj.changedDate = Date.now();
+    new ButtonElement(strings.setupSelect, () => callFileSelector(parse)).to(select);
     
-    return JSON.stringify(obj);
-  }
-  
-  function parse(file) {
-    readFileAsText(file, parseJSON, () => alert(strings.readFileFailed));
-  }
-  
-  function parseJSON(json) {
-    try {
-      obj = JSON.parse(json);
-    } catch (e) {
-      alert(strings.readFileFailed);
-      
-      return;
-    }
+    new Element({
+        elementType: "label",
+        textContent: strings.sandboxName+":"
+    }).to(edit);
     
-    settings = setupSettings("setup", {
-      strings,
-      
-      header: "h2",
-      
-      prog: getSimulationConsts(obj.consts).genomeHeight,
-      
-      onstart: start
-    });
-    
-    settings.randomSeed();
-    
-    nameelem.attr("value", obj.name);
-    descrelem.attr("value", obj.description);
-    
-    settings.sun.value = obj.settings.sun ?? 500;
-    settings.resources.value = obj.settings.resources ?? 10000;
-    settings.density.value = obj.settings.density ?? 50;
-    settings.prog.value = obj.settings.prog ?? 0;
-    
-    select.hide();
-    edit.show();
-    setup.show();
-  }
-  
-  function start() {
-    if (interval) {
-      clearInterval(interval);
-      
-      main.attr("innerHTML", "");
-    }
-    
-    const size = +settings.size.value;
-    
-    const reqmem = (size**2)*512;
-    
-    const gib = 2**30;
-    
-    const devmem = (navigator.deviceMemory ?? 0.5)*gib/2;
-    
-    if (devmem <= reqmem || reqmem >= gib) if (!confirm(strings.memoryAsk(reqmem))) return;
-    
-    try {
-      simulation = createSimulation(size, size, {
-        ...obj.consts,
-        mutationChance: 0
-      }, +settings.seed.value);
-    } catch (e) {
-      alert(strings.noMemory);
-      
-      return;
-    }
-    
-    const methods = simulation.methods;
-    
-    const genomeLength = simulation.consts.genomeWidth*simulation.consts.genomeHeight;
-    
-    const charge = +settings.resources.value;
-    const organic = charge/simulation.consts.organicCost;
-    
-    let clan = 0;
-    
-    setup.hide();
-    progressdiv.show();
-    
-    function createWorld(i, callback) {
-      const start = performance.now();
-      
-      while (performance.now()-start < 10) {
-        simulation.organic[i] = organic;
-        simulation.charge[i] = charge;
+    const nameelem = new Element({
+        elementType: "input",
+        type: "text",
+        className: "nameinput",
         
-        if (methods.chance(0.01/(+settings.density.value))) {
-          methods.putNewCellIndex(2, i);
-          
-          simulation.energy[i] = 20000;
-          simulation.angle[i] = methods.randomInt(4);
-          
-          simulation.current[i] = 0;
-          simulation.curprog[i] = +settings.prog.value;
-          simulation.clan[i] = clan++;
-          
-          for (let j = 0; j < genomeLength; j++) simulation.genome[i*genomeLength+j] = obj.genome[j];
+        onchange: function() {
+            obj.name = this.value;
+        }
+    }).to(new DivElement().to(edit));
+    
+    new Element({
+        elementType: "label",
+        textContent: strings.sandboxDescription+":"
+    }).to(edit);
+    
+    const descrelem = new Element({
+        elementType: "textarea",
+        className: "textarea",
+        
+        onchange: function() {
+            obj.description = this.value;
+        }
+    }).to(new DivElement().to(edit));
+    
+    new ButtonElement(strings.setupDownload, () => downloadText(getJSON(), (obj.name ? obj.name:"unnamed")+".alife-species")).to(new DivElement().to(edit));
+    
+    const progressdiv = new DivElement().hide().to(document.body);
+    
+    new Element({
+        elementType: "p",
+        className: "label",
+        textContent: strings.setupCreating
+    }).to(progressdiv);
+    
+    const progress = new ProgressBar().to(progressdiv);
+    
+    setupLanguageChanger(new DivElement().to(select), strings, language);
+    
+    var obj, settings, simulation, interface, interval;
+    
+    function getJSON() {
+        obj.settings = {
+            sun: +settings.sun.value,
+            resources: +settings.resources.value,
+            prog: +settings.prog.value,
+            density: +settings.density.value
+        };
+        
+        obj.changedDate = Date.now();
+        
+        return JSON.stringify(obj);
+    }
+    
+    function parse(file) {
+        readFileAsText(file, parseJSON, () => alert(strings.readFileFailed));
+    }
+    
+    function parseJSON(json) {
+        try {
+            obj = JSON.parse(json);
+        } catch (e) {
+            alert(strings.readFileFailed);
+            
+            return;
         }
         
-        if (++i === simulation.type.length) {
-          callback();
-          
-          return;
-        }
-      }
-      
-      progress.draw(i/simulation.type.length);
-      
-      setTimeout(() => createWorld(i, callback));
+        settings = setupSettings("setup", {
+            strings,
+            
+            header: "h2",
+            
+            prog: getSimulationConsts(obj.consts).genomeHeight,
+            
+            onstart: start
+        });
+        
+        settings.randomSeed();
+        
+        nameelem.attr("value", obj.name);
+        descrelem.attr("value", obj.description);
+        
+        settings.sun.value = obj.settings.sun ?? 500;
+        settings.resources.value = obj.settings.resources ?? 10000;
+        settings.density.value = obj.settings.density ?? 50;
+        settings.prog.value = obj.settings.prog ?? 0;
+        
+        select.hide();
+        edit.show();
+        setup.show();
     }
     
-    createWorld(0, function() {
-      simulation.sun = +settings.sun.value;
-      
-      const targetsize = 
-        size == 800 ? 1600:
-        size == 1800 ? 1800:1200;
-      
-      interface = setupInterface("main", simulation, {
-        strings,
-        language,
-        targetsize,
+    function start() {
+        if (interval) {
+            clearInterval(interval);
+            
+            main.attr("innerHTML", "");
+        }
         
-        keys: false
-      });
-      
-      interface.pause.onclick();
-      
-      renderer = createRenderer(interface, simulation, style);
+        const size = +settings.size.value;
+        
+        const reqmem = (size**2)*512;
+        
+        const gib = 2**30;
+        
+        const devmem = (navigator.deviceMemory ?? 0.5)*gib/2;
+        
+        if (devmem <= reqmem || reqmem >= gib) if (!confirm(strings.memoryAsk(reqmem))) return;
+        
+        try {
+            simulation = createSimulation(size, size, {
+                ...obj.consts,
+                mutationChance: 0
+            }, +settings.seed.value);
+        } catch (e) {
+            alert(strings.noMemory);
+            
+            return;
+        }
+        
+        const methods = simulation.methods;
+        
+        const genomeLength = simulation.consts.genomeWidth*simulation.consts.genomeHeight;
+        
+        const charge = +settings.resources.value;
+        const organic = charge/simulation.consts.organicCost;
+        
+        let clan = 0;
+        
+        setup.hide();
+        progressdiv.show();
+        
+        function createWorld(i, callback) {
+            const start = performance.now();
+            
+            while (performance.now()-start < 10) {
+                simulation.organic[i] = organic;
+                simulation.charge[i] = charge;
+                
+                if (methods.chance(0.01/(+settings.density.value))) {
+                    methods.putNewCellIndex(2, i);
+                    
+                    simulation.energy[i] = 20000;
+                    simulation.angle[i] = methods.randomInt(4);
+                    
+                    simulation.current[i] = 0;
+                    simulation.curprog[i] = +settings.prog.value;
+                    simulation.clan[i] = clan++;
+                    
+                    for (let j = 0; j < genomeLength; j++) simulation.genome[i*genomeLength+j] = obj.genome[j];
+                }
+                
+                if (++i === simulation.type.length) {
+                    callback();
+                    
+                    return;
+                }
+            }
+            
+            progress.draw(i/simulation.type.length);
+            
+            setTimeout(() => createWorld(i, callback));
+        }
+        
+        createWorld(0, function() {
+            simulation.sun = +settings.sun.value;
+            
+            const targetsize = 
+                size == 800 ? 1600:
+                size == 1800 ? 1800:1200;
+            
+            interface = setupInterface("main", simulation, {
+                strings,
+                language,
+                targetsize,
+                
+                keys: false
+            });
+            
+            interface.pause.onclick();
+            
+            renderer = createRenderer(interface, simulation, style);
+        
+            interval = startWindow([], [], interface, simulation, renderer, 60);
+            
+            progressdiv.hide();
+            
+            setup.show();
+            main.show();
+        });
+    }
     
-      interval = startWindow([], [], interface, simulation, renderer, 60);
-      
-      progressdiv.hide();
-      
-      setup.show();
-      main.show();
-    });
-  }
-  
-  if (sessionStorage.getItem("alife-save")) {
-    parseJSON(sessionStorage.getItem("alife-save"));
-    
-    sessionStorage.setItem("alife-save", "");
-  }
+    if (sessionStorage.getItem("alife-save")) {
+        parseJSON(sessionStorage.getItem("alife-save"));
+        
+        sessionStorage.setItem("alife-save", "");
+    }
 </script>

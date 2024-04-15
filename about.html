@@ -1,35 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>ALife</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>ALife</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="assets/icon.svg">
 </head>
 <body>
-  <div class="div">
-    <h1 id="header" class="header"></h1>
-    <a id="mainpage" class="pagelink"></a>
-  </div>
-  <p id="version" class="stat"></p>
-  <p id="developer" class="stat"></p>
-  <p id="idea" class="stat"></p>
-  <a id="github" href="https://github.com/Megospc/ALife/" class="stat"></a>
+    <div class="div">
+        <h1 id="header" class="header"></h1>
+        <a id="mainpage" class="pagelink"></a>
+    </div>
+    <img src="assets/logo.svg" class="logo">
+    <p id="version" class="stat"></p>
+    <p id="developer" class="stat"></p>
+    <p id="idea" class="stat"></p>
+    <a id="github" href="https://github.com/Megospc/ALife/" class="pagelink"></a>
 </body>
 </html>
 <script src="strings.js"></script>
 <script src="utils.js"></script>
 <script>
-  const { language, strings } = getWindowStrings(languagesStrings);
-  
-  new Element("mainpage")
-    .attr("textContent", strings.toMainpage)
-    .attr("href", "index.html?lang="+language);
-  
-  const version = "1.5.5 (21.03.2024)";
-  
-  new Element("header").attr("textContent", strings.aboutHeader);
-  new Element("version").attr("textContent", strings.aboutVersion+": "+version);
-  new Element("developer").attr("innerHTML", strings.aboutDeveloper+`: <a href="https://github.com/Megospc/">Megospc</a>`);
-  new Element("idea").attr("innerHTML", strings.aboutIdea+": "+strings.aboutIdeaValue);
-  new Element("github").attr("innerHTML", strings.aboutGithub);
+    const { language, strings } = getWindowStrings(languagesStrings);
+    
+    new Element("mainpage")
+        .attr("textContent", strings.toMainpage)
+        .attr("href", "index.html?lang="+language);
+    
+    const version = "1.6.3 (15.04.2024)";
+    
+    new Element("header").attr("textContent", strings.aboutHeader);
+    new Element("version").attr("textContent", strings.aboutVersion+": "+version);
+    new Element("developer").attr("innerHTML", strings.aboutDeveloper+`: <a href="https://github.com/Megospc/" class="pagelink">Megospc</a>`);
+    new Element("idea").attr("innerHTML", strings.aboutIdea+": "+strings.aboutIdeaValue);
+    new Element("github").attr("innerHTML", strings.aboutGithub);
 </script>

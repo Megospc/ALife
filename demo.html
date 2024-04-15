@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>ALife</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>ALife</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="assets/icon.svg">
 </head>
 <body>
-  <div id="main"></div>
+    <div id="main"></div>
 </body>
 </html>
 <script src="strings.js"></script>
@@ -17,56 +18,56 @@
 <script src="main.js"></script>
 <script src="render.js"></script>
 <script>
-  const { language, strings } = getWindowStrings(languagesStrings);
-  
-  const main = new Element("main");
-  
-  const simulation = createSimulation(300, 300, simulationConsts, generateRandomSeed());
-  
-  const interface = setupInterface("main", simulation, {
-    strings,
-    language,
+    const { language, strings } = getWindowStrings(languagesStrings);
     
-    bottomstats: false,
+    const main = new Element("main");
     
-    targetsize: 1200
-  });
-  
-  const renderer = createRenderer(interface, simulation, style);
-  
-  const methods = simulation.methods;
-  
-  for (let i = 0, clan = 0; i < simulation.type.length; i++) {
-    if (!methods.chance(1/9)) continue;
+    const simulation = createSimulation(300, 300, simulationConsts, generateRandomSeed());
     
-    methods.putNewCellIndex(2, i);
+    const interface = setupInterface("main", simulation, {
+        strings,
+        language,
+        
+        bottomstats: false,
+        
+        targetsize: 1200
+    });
     
-    simulation.energy[i] = 20000;
-    simulation.angle[i] = methods.randomInt(4);
+    const renderer = createRenderer(interface, simulation, style);
     
-    simulation.current[i] = 0;
-    simulation.curprog[i] = 0;
-    simulation.clan[i] = clan++;
+    const methods = simulation.methods;
     
-    methods.copyGenome(i);
-  }
-  
-  const charge = 10000;
-  const organic = charge/simulation.consts.organicCost;
-  
-  for (let i = 0; i < simulation.organic.length; i++) simulation.organic[i] = organic;
-  for (let i = 0; i < simulation.charge.length; i++) simulation.charge[i] = charge;
-  
-  simulation.sun = 500;
-  
-  new Element({
-    elementType: "a",
-    href: "index.html?lang="+language,
-    className: "pagelink",
-    textContent: strings.toMainpage
-  }).to(main);
-  
-  setupLanguageChanger(new DivElement().to(main), strings, language);
-  
-  startWindow([], [], interface, simulation, renderer);
+    for (let i = 0, clan = 0; i < simulation.type.length; i++) {
+        if (!methods.chance(1/9)) continue;
+        
+        methods.putNewCellIndex(2, i);
+        
+        simulation.energy[i] = 20000;
+        simulation.angle[i] = methods.randomInt(4);
+        
+        simulation.current[i] = 0;
+        simulation.curprog[i] = 0;
+        simulation.clan[i] = clan++;
+        
+        methods.copyGenome(i);
+    }
+    
+    const charge = 10000;
+    const organic = charge/simulation.consts.organicCost;
+    
+    for (let i = 0; i < simulation.organic.length; i++) simulation.organic[i] = organic;
+    for (let i = 0; i < simulation.charge.length; i++) simulation.charge[i] = charge;
+    
+    simulation.sun = 500;
+    
+    new Element({
+        elementType: "a",
+        href: "index.html?lang="+language,
+        className: "pagelink",
+        textContent: strings.toMainpage
+    }).to(main);
+    
+    setupLanguageChanger(new DivElement().to(main), strings, language);
+    
+    startWindow([], [], interface, simulation, renderer);
 </script>

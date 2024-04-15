@@ -2,16 +2,16 @@
 
 **English 🇺🇸 | [Русский](README-RU.md) 🇷🇺**
 
-Artificial life: simulation of evolution.
+Artificial life: battle of multicellular organisms.
 
 Idea is taken from the project "The Battle Of Clans" by [Simulife Hub](https://youtube.com/@wallcraft-video).
 
-Version: 1.5.5 (21.03.2024)
+Version: 1.6.3 (15.04.2024)
 
-[**DEMOVERSION**](https://megospc.github.io/ALife/demo.html?lang=en)\
-[**FULL VERSION**](https://megospc.github.io/ALife/index.html?lang=en)
+[**Demoversion**](https://megospc.github.io/ALife/demo.html?lang=en)\
+[**Full version**](https://megospc.github.io/ALife/index.html?lang=en)
 
-## Screenshots
+## Screenshots 📸
 <img width="450" src="images/snap1.png">
 <img width="450" src="images/snap2.png">
 <img width="450" src="images/snap3.png">
@@ -20,21 +20,21 @@ Version: 1.5.5 (21.03.2024)
 <img width="450" src="images/snap6.png">
 
 <details>
-  <summary><b>Open me!</b></summary>
-  <img width="600" src="images/snap-big.png">
+    <summary><b>Open me!</b></summary>
+    <img width="600" src="images/snap-big.png">
 </details>
 
-## Features
+## Features ✨
 + It works right in a browser: **you don't need to download anything**, just go by [the link](https://megospc.github.io/ALife/index.html?lang=en).
 + You can run worlds up to **1800x1800 tiles** in size.
 + It renders on GPU using WebGL, so **it's 10x faster**!
 + A required memory buffer allocates when a simulation starts, so JavaScript's garbage cleaner isn't busy. **Processing is 2x faster**.
 + It works on mobile devices.
 
-## Description
+## Description 📖
 **ALife** simulates evolution of multicellular organisms.
 
-### Operating Principle
+### How It Works
 The simulation field consists of many squares (a "*Tile*"). Each *tile* contains a some amount of resources: *organic* and *charge*. There may also be a living cell on the tile (a "*Cell*"). Each *cell* has its own energy reserve and consumes a little each turn. If there isn't enough energy, the cell dies. When a cell dies, *organic* and *charge* remain in the 3x3 **tiles** area (amount of charge = energy that was in the cell). If there is too much *organic* or *charge* in a tile, it becomes *poisoned*. The cell dies if its *tile* is *poisoned*.
 
 Cells can be different types:
@@ -46,41 +46,41 @@ Cells can be different types:
 + **Seed**. A dormant shoot. If the wood to which the seed is attached dies, the seed wakes up and turns into a shoot that will continue to follow the commands of the *genome*. Sometimes, before waking up, a seed shoots out and flies through some number of *tiles*. If the such a seed collides with another *cell*, both die. Also, the seed will fall off and wake up if it accumulates 30K energy.
 
 <table>
-  <thead>
-    <th>Type</th>
-    <th>Consumption</th>
-  </thead>
-  <tbody>
-    <tr>
-      <th>Leaf</th>
-      <td>10</td>
-    </tr>
-    <tr>
-      <th>Root</th>
-      <td>10</td>
-    </tr>
-    <tr>
-      <th>Aerial</th>
-      <td>10</td>
-    </tr>
-    <tr>
-      <th>Wood</th>
-      <td>10</td>
-    </tr>
-    <tr>
-      <th>Shoot</th>
-      <td>50</td>
-    </tr>
-    <tr>
-      <th>Seed</th>
-      <td>5</td>
-    </tr>
-  </tbody>
+    <thead>
+        <th>Type</th>
+        <th>Consumption</th>
+    </thead>
+    <tbody>
+        <tr>
+            <th>Leaf</th>
+            <td>10</td>
+        </tr>
+        <tr>
+            <th>Root</th>
+            <td>10</td>
+        </tr>
+        <tr>
+            <th>Aerial</th>
+            <td>10</td>
+        </tr>
+        <tr>
+            <th>Wood</th>
+            <td>10</td>
+        </tr>
+        <tr>
+            <th>Shoot</th>
+            <td>50</td>
+        </tr>
+        <tr>
+            <th>Seed</th>
+            <td>5</td>
+        </tr>
+    </tbody>
 </table>
 
 <img width="300" src="images/description1en.png">
 
-### Home Page
+### Simulation Settings
 On the [home page](https://megospc.github.io/ALife/index.html?lang=en), you see the simulation settings:
 + **Seed**. The number from which the simulation will be created. Simulations with the same settings and seeds will give the same result.
 + **Field size**. The size of the simulation in *tiles*.

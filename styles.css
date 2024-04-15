@@ -1,155 +1,160 @@
 /* light theme */
 
 body {
-  background-color: #ffffff;
-  color: #000000;
+    background-color: #ffffff;
+    color: #000000;
 }
 h1, h2 , h3, input, label, button, p, select, a, b {
-  font-family: Monospace, Sans-Serif;
+    font-family: Monospace, Sans-Serif;
 }
 .nameinput {
-  width: 600px;
-  font-size: 15px;
-  border: 1px solid #808080;
-  border-radius: 3px;
-  padding-top: 1.5px;
-  padding-bottom: 1.5px;
+    width: 600px;
+    font-size: 15px;
+    border: 1px solid #808080;
+    border-radius: 3px;
+    padding-top: 1.5px;
+    padding-bottom: 1.5px;
 }
 .progressbar {
-  width: 400px;
-  height: 20px;
-  border: 1px solid #a0a0a0;
-  border-radius: 5px;
+    width: 400px;
+    height: 20px;
+    border: 1px solid #a0a0a0;
+    border-radius: 5px;
 }
 .pagelink {
-  color: #0000a0;
-  margin-top: 5px;
-  margin-bottom: 100px;
-  font-size: 16px;
+    color: #0000a0;
+    margin-top: 5px;
+    margin-bottom: 100px;
+    font-size: 16px;
 }
 .header {
-  margin-bottom: 0.3em;
+    margin-bottom: 0.3em;
 }
 .div {
-  margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 .openeddiv {
-  margin-left: 20px;
+    margin-left: 20px;
 }
 .headdiv {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 .langdiv {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 .lang {
-  margin-left: 5px;
-  margin-right: 5px;
-  text-decoration: none;
-  color: #000080;
+    margin-left: 5px;
+    margin-right: 5px;
+    text-decoration: none;
+    color: #000080;
 }
 .stat {
-  margin-top: 5px;
-  margin-bottom: 5px;
-  font-size: 16px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 16px;
 }
 .label {
-  font-size: 16px;
+    font-size: 16px;
 }
 .canvas {
-  width: 400px;
-  height: 400px;
-  border: 2px solid #808080;
-  border-radius: 5px;
-  margin-right: -404px;
-  margin-left: 0px;
+    width: 400px;
+    height: 400px;
+    border: 2px solid #808080;
+    border-radius: 5px;
+    margin-right: -404px;
+    margin-left: 0px;
 }
 .input[type="number"] {
-  width: 120px;
-  font-size: 15px;
-  border: 1px solid #808080;
-  border-radius: 3px;
-  padding-top: 1.5px;
-  padding-bottom: 1.5px;
-  background-color: #f8f8f8;
-  color: #000000;
+    width: 120px;
+    font-size: 15px;
+    border: 1px solid #808080;
+    border-radius: 3px;
+    padding-top: 1.5px;
+    padding-bottom: 1.5px;
+    background-color: #f8f8f8;
+    color: #000000;
 }
 .input[type="checkbox"] {
-  margin-right: 10px;
+    margin-right: 10px;
 }
 .textarea {
-  margin-bottom: 10px;
-  resize: none;
-  width: 600px;
-  height: 200px;
-  font-size: 15px;
-  border: 1px solid #808080;
-  border-radius: 3px;
-  padding-top: 1.5px;
-  padding-bottom: 1.5px;
+    margin-bottom: 10px;
+    resize: none;
+    width: 600px;
+    height: 200px;
+    font-size: 15px;
+    border: 1px solid #808080;
+    border-radius: 3px;
+    padding-top: 1.5px;
+    padding-bottom: 1.5px;
 }
 .button {
-  margin-left: 5px;
-  color: #ffffff;
-  border-radius: 5px;
-  border: none;
-  background-color: #4676d7;
-  min-width: 120px;
-  font-size: 16px;
-  padding: 3px;
+    margin-left: 5px;
+    color: #ffffff;
+    border-radius: 5px;
+    border: none;
+    background-color: #4676d7;
+    min-width: 120px;
+    font-size: 16px;
+    padding: 3px;
 }
 .minibtn {
-  margin-left: 5px;
-  color: #ffffff;
-  border-radius: 3px;
-  border: none;
-  background-color: #4676d7;
-  min-width: 75px;
-  font-size: 14px;
-  padding: 3px;
+    margin-left: 5px;
+    color: #ffffff;
+    border-radius: 3px;
+    border: none;
+    background-color: #4676d7;
+    min-width: 75px;
+    font-size: 14px;
+    padding: 3px;
 }
 .button:focus, .minibtn:focus {
-  outline: none;
-  box-shadow: 0 0 0 4px #4676d740;
+    outline: none;
+    box-shadow: 0 0 0 4px #4676d740;
 }
 .button:hover, .minibtn:hover {
-  background-color: #1d49aa;
+    background-color: #1d49aa;
 }
 .select {
-  min-width: 120px;
-  font-size: 15px;
-  border: 1px solid #808080;
-  border-radius: 3px;
-  padding-top: 1.5px;
-  padding-bottom: 1.5px;
-  background-color: #f0f0f0;
-  color: #000000;
+    min-width: 120px;
+    font-size: 15px;
+    border: 1px solid #808080;
+    border-radius: 3px;
+    padding-top: 1.5px;
+    padding-bottom: 1.5px;
+    background-color: #f0f0f0;
+    color: #000000;
+}
+.logo {
+    width: 300px;
+    background-color: #ffffff;
+    border: 10px solid #ffffff;
 }
 
 /* dark theme */
 
 @media (prefers-color-scheme: dark) {
-  body {
-    background-color: #202020;
-    color: #c0c0c0;
-  }
-  .pagelink {
-    color: #8080f0;
-  }
-  .lang {
-    color: #5050a0;
-  }
-  .progressbar {
-    border-color: #606060;
-  }
-  .input[type="number"], .select, .textarea, .nameinput {
-    background-color: #404040;
-    color: #c0c0c0;
-  }
-  .button:focus, .minibtn:focus {
-    box-shadow: 0 0 0 4px #6696f740;
-  }
-  .button:hover, .minibtn:hover {
-    background-color: #6696f7;
-  }
+    body {
+        background-color: #202020;
+        color: #c0c0c0;
+    }
+    .pagelink {
+        color: #8080f0;
+    }
+    .lang {
+        color: #5050a0;
+    }
+    .progressbar {
+        border-color: #606060;
+    }
+    .input[type="number"], .select, .textarea, .nameinput {
+        background-color: #404040;
+        color: #c0c0c0;
+    }
+    .button:focus, .minibtn:focus {
+        box-shadow: 0 0 0 4px #6696f740;
+    }
+    .button:hover, .minibtn:hover {
+        background-color: #6696f7;
+    }
 }
